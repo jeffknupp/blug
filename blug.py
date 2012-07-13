@@ -5,6 +5,7 @@ import markdown
 import os
 import yaml
 import datetime
+import shutil
 
 # categories:
 # recent_posts:
@@ -75,7 +76,14 @@ def generate_files(template_variables):
         open(os.path.join(output_dir,
             post['relative_url']), 'w').write(final_html)
 
+def copy_static_content():
+    """Copy (if necessary) the static content to the appropriate directory"""
+    if not os.path.exists(os.path.join(os.curdir, 'generated', 'static')):
+        shutil.copytree('static', os.path.join(os.curdir, 'generated', 'static')) 
 
 if __name__ == '__main__':
     site_config = yaml.load(open('config.yml', 'r').read())
+    if not os.path.exists(os.path.join(os.curdir, 'generated')):
+        os.mkdir(os.path.join(os.curdir, 'generated'))
     generate_files(site_config)
+    copy_static_content()
