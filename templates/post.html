@@ -172,9 +172,9 @@
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
     
-      {% for post in site.recent_posts %}
+      {% for r_post in site.recent_posts %}
       <li class="post">
-      <a href="{{ post.relative_url }}">{{ post.title }}</a>
+      <a href="{{ r_post.relative_url }}">{{ r_post.title }}</a>
       </li>
       {% endfor %} 
   </ul>

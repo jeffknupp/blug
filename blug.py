@@ -33,8 +33,10 @@ def get_all_posts(input_files, content_dir):
 
         (front_matter, sep, post_body) = post_file_buffer.partition('\n---\n')
         post = yaml.load(front_matter)
-        post['post_file_name'] = post_file_name
+        post['relative_url'] = post_file_name
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
+        post['relative_url'] = post_file_name.replace(
+                os.path.splitext(post_file_name)[1], '.html')
         if 'date' in post:
             post['date'] = datetime.datetime.strptime(
                     (post['date'].strip()), '%Y-%m-%d %H:%M')
@@ -70,10 +72,8 @@ def generate_files(template_variables):
                 template_file_buffer).render(template_variables_copy)
         # markdown doesn't have a universally agreed upon extension, so
         # don't assume a particular one here
-        final_html_file_name = post['post_file_name'].replace(
-                os.path.splitext(post['post_file_name'])[1], '.html')
         open(os.path.join(output_dir,
-            final_html_file_name), 'w').write(final_html)
+            post['relative_url']), 'w').write(final_html)
 
 
 if __name__ == '__main__':
