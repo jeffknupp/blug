@@ -1,3 +1,7 @@
+# ignore content and content generation directories
+generated/*
+content/*
+
 *.py[co]
 
 # Packages
@@ -25,3 +29,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+*live.html
