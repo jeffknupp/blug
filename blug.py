@@ -6,6 +6,7 @@ import os
 import yaml
 import datetime
 import shutil
+import argparse
 
 # categories:
 # recent_posts:
@@ -19,6 +20,14 @@ import shutil
 # post_previous.title
 # post.relative_url
 # post.canonical_url
+
+POST_SKELETON="""
+title: "{title}"
+date: {date}
+comments: true
+categories: 
+---
+"""
 
 
 def get_all_posts(input_files, content_dir):
@@ -76,13 +85,33 @@ def generate_files(template_variables):
         open(os.path.join(output_dir,
             post['relative_url']), 'w').write(final_html)
 
+def create_post(title):        
+    """Create an empty post with the YAML front matter generated"""
+    post_file_date = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d-')
+    post_date = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d %H:%M')
+    
+    post_file_name = post_file_date + '-'.join(str.split(title[0])) + '.markdown'
+    content_dir = os.path.join(os.curdir, 'content')
+    with open(os.path.join(content_dir, post_file_name), 'w') as post_file:
+        post_file.write(POST_SKELETON.format(date=post_date, title=title[0]))
+
+
 def copy_static_content():
     """Copy (if necessary) the static content to the appropriate directory"""
-    shutil.copytree('static', os.path.join(os.curdir, 'generated')) 
 
-if __name__ == '__main__':
+    shutil.copytree('static', os.path.join(os.curdir, 'generated', 'static')) 
+
+argument_parser = argparse.ArgumentParser(description='Generate a static HTML blog from Markdown blog entries')
+argument_parser.add_argument('-p, --post', nargs=1, action='store', dest='post_title', help='Create a new post with the title of this option\'s argument')
+arguments = argument_parser.parse_args()
+
+if 'post_title' in vars(arguments):
+    create_post(arguments.post_title)
+else:
     site_config = yaml.load(open('config.yml', 'r').read())
-    if not os.path.exists(os.path.join(os.curdir, 'generated')):
-        os.mkdir(os.path.join(os.curdir, 'generated'))
+    if os.path.exists(os.path.join(os.curdir, 'generated')):
+        shutil.rmtree(os.path.join(os.curdir, 'generated'))
+    os.mkdir(os.path.join(os.curdir, 'generated'))
+
     generate_files(site_config)
     copy_static_content()
