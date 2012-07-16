@@ -58,9 +58,9 @@ def get_all_posts(input_files, content_dir):
 def generate_files(template_variables):
     """Generate all HTML files from the template directory using the sitewide
     configuration"""
-    content_dir = os.path.join(os.curdir, 'content')
-    output_dir = os.path.join(os.curdir, 'generated')
-    template_dir = os.path.join(os.curdir, 'templates')
+    content_dir = os.path.join(os.getcwd(), 'content')
+    output_dir = os.path.join(os.getcwd(), 'generated')
+    template_dir = os.path.join(os.getcwd(), 'templates')
     input_files = os.listdir(content_dir)
 
     all_posts = get_all_posts(input_files, content_dir)
@@ -93,7 +93,7 @@ def create_post(title):
     post_date = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d %H:%M')
     
     post_file_name = post_file_date + '-'.join(str.split(title)) + '.markdown'
-    content_dir = os.path.join(os.curdir, 'content')
+    content_dir = os.path.join(os.getcwd(), 'content')
     with open(os.path.join(content_dir, post_file_name), 'w') as post_file:
         post_file.write(POST_SKELETON.format(date=post_date, title=title))
 
@@ -101,27 +101,28 @@ def create_post(title):
 def copy_static_content():
     """Copy (if necessary) the static content to the appropriate directory"""
 
-    shutil.copytree('static', os.path.join(os.curdir, 'generated', 'static')) 
+    shutil.copytree('static', os.path.join(os.getcwd(), 'generated', 'static')) 
 
-argument_parser = argparse.ArgumentParser(description='Generate a static HTML blog from Markdown blog entries')
-command_group = argument_parser.add_mutually_exclusive_group()
-command_group.add_argument('-p, --post', action='store', dest='post_title', help=
-        'Create a new post with the title of this option\'s argument')
-command_group.add_argument('-g, --generate', dest='generate', action='store_true', help=
-        'Generate the complete static site using the posts in the \'content\' directory')
-arguments = argument_parser.parse_args()
+if __name__ == '__main__':
+    argument_parser = argparse.ArgumentParser(description='Generate a static HTML blog from Markdown blog entries')
+    command_group = argument_parser.add_mutually_exclusive_group()
+    command_group.add_argument('-p, --post', action='store', dest='post_title', help=
+            'Create a new post with the title of this option\'s argument')
+    command_group.add_argument('-g, --generate', dest='generate', action='store_true', help=
+            'Generate the complete static site using the posts in the \'content\' directory')
+    arguments = argument_parser.parse_args()
 
-argument_dict = vars(arguments)
-print (argument_dict)
-if 'post_title' in argument_dict and argument_dict['post_title'] != False:
-    print ('Creating post...')
-    create_post(argument_dict['post_title'])
-elif 'generate' in argument_dict and argument_dict['generate'] == True:
-    print ('Generating...')
-    site_config = yaml.load(open('config.yml', 'r').read())
-    if os.path.exists(os.path.join(os.curdir, 'generated')):
-        shutil.rmtree(os.path.join(os.curdir, 'generated'))
-    os.mkdir(os.path.join(os.curdir, 'generated'))
+    argument_dict = vars(arguments)
+    print (argument_dict)
+    if 'post_title' in argument_dict and argument_dict['post_title'] != False:
+        print ('Creating post...')
+        create_post(argument_dict['post_title'])
+    elif 'generate' in argument_dict and argument_dict['generate'] == True:
+        print ('Generating...')
+        site_config = yaml.load(open('config.yml', 'r').read())
+        if os.path.exists(os.path.join(os.getcwd(), 'generated')):
+            shutil.rmtree(os.path.join(os.getcwd(), 'generated'))
+        os.mkdir(os.path.join(os.getcwd(), 'generated'))
 
-    generate_files(site_config)
-    copy_static_content()
+        generate_files(site_config)
+        copy_static_content()
