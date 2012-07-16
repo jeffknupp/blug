@@ -68,6 +68,8 @@ def generate_files(template_variables):
     template_variables['site']['recent_posts'] = all_posts[:5]
 
     for index, post in enumerate(all_posts):
+        if not post['body']:
+            raise EnvironmentError('No content for post [{post}] found.'.format(post=post['relative_url']))
         post['description'] = post['body'].split()[0]
         template_variables_copy = template_variables
         post['post_previous'] = all_posts[index - 1]
@@ -90,10 +92,10 @@ def create_post(title):
     post_file_date = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d-')
     post_date = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d %H:%M')
     
-    post_file_name = post_file_date + '-'.join(str.split(title[0])) + '.markdown'
+    post_file_name = post_file_date + '-'.join(str.split(title)) + '.markdown'
     content_dir = os.path.join(os.curdir, 'content')
     with open(os.path.join(content_dir, post_file_name), 'w') as post_file:
-        post_file.write(POST_SKELETON.format(date=post_date, title=title[0]))
+        post_file.write(POST_SKELETON.format(date=post_date, title=title))
 
 
 def copy_static_content():
@@ -102,12 +104,20 @@ def copy_static_content():
     shutil.copytree('static', os.path.join(os.curdir, 'generated', 'static')) 
 
 argument_parser = argparse.ArgumentParser(description='Generate a static HTML blog from Markdown blog entries')
-argument_parser.add_argument('-p, --post', nargs=1, action='store', dest='post_title', help='Create a new post with the title of this option\'s argument')
+command_group = argument_parser.add_mutually_exclusive_group()
+command_group.add_argument('-p, --post', action='store', dest='post_title', help=
+        'Create a new post with the title of this option\'s argument')
+command_group.add_argument('-g, --generate', dest='generate', action='store_true', help=
+        'Generate the complete static site using the posts in the \'content\' directory')
 arguments = argument_parser.parse_args()
 
-if 'post_title' in vars(arguments):
-    create_post(arguments.post_title)
-else:
+argument_dict = vars(arguments)
+print (argument_dict)
+if 'post_title' in argument_dict and argument_dict['post_title'] != False:
+    print ('Creating post...')
+    create_post(argument_dict['post_title'])
+elif 'generate' in argument_dict and argument_dict['generate'] == True:
+    print ('Generating...')
     site_config = yaml.load(open('config.yml', 'r').read())
     if os.path.exists(os.path.join(os.curdir, 'generated')):
         shutil.rmtree(os.path.join(os.curdir, 'generated'))
