@@ -8,7 +8,7 @@ site:
   feed_url: http://feeds.feedburner.com/hackersgonnahack
   domain: jeffknupp.com
   url: http://www.jeffknupp.com
+  blog_prefix: blog
   title: Hackers Gonna Hack
   tag_line: On Hacking and Hustling
-  permalink: /blog/:year/:month/:day/:title/
   author: Jeff Knupp

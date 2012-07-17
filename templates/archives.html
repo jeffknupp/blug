@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+        {% block content %}
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">Blog Archive</h1>
+    
+  </header>
+  
+  <div id="blog-archives">
+
+
+
+  
+  <h2>2012</h2>
+  {% for post in site.all_posts %}
+<article>
+  
+<h1><a href="{{ post.relative_url }}">{{ post.title }}</a></h1>
+<time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime('%Y-%m-%d %I:%M') }}</time>
+<footer>
+    {% for category in post.categories %}
+    <a class='category' href='/blog/categories/{{ category.slug }}/'>{{ category.title }}</a>,
+    {% endfor %}
+</footer>
+{% endfor %}
+
+</article>
+{% endblock %}

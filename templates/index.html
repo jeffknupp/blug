@@ -6,9 +6,9 @@
  {% for post in site.recent_posts %} 
     <article>
   <header>
-      <h1 class="entry-title"><a href="/blog/2012/07/10/software-optimization-a-systematic-approach/">Software Optimization: A Systematic Approach</a></h1>
+  <h1 class="entry-title"><a href="{{ post.relative_url}}">{{ post.title }}</a></h1>
       <p class="meta">
-<time datetime="2012-07-10T05:25:00-04:00" pubdate data-updated="true">Jul 10<span>th</span>, 2012</time>
+      <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime('%Y-%m-%d %I:%M') }}</time>
       </p>
   </header>
   <div class="entry-content">

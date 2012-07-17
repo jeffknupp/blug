@@ -66,7 +66,7 @@ def get_all_posts(content_dir):
 
 def generate_post(post, template_variables):
     """Generate a single post's HTML file"""
-    output_dir = os.path.join(os.getcwd(), 'generated')
+    output_dir = template_variables['output_dir']
 
     if not post['body']:
         raise EnvironmentError('No content for post [{post}] found.'.format(
@@ -84,34 +84,36 @@ def generate_post(post, template_variables):
         post['relative_url']), 'w').write(final_html)
 
 
-def generate_index(template_variables):
-    """Generate the index page"""
-    output_dir = os.path.join(os.getcwd(), 'generated')
-    template = template_variables['env'].get_template('index.html')
+def generate_static_page(template_variables, page_name, template_name=None):
+    """Generate static pages"""
+    if not template_name:
+        template_name = page_name
+    template = template_variables['env'].get_template(page_name)
     resulting_html = template.render(template_variables)
-    with open(os.path.join(output_dir, 'index.html'), 'w') as output_file:
+    with open(os.path.join(template_variables['output_dir'], template_name),
+            'w') as output_file:
         output_file.write(resulting_html)
 
 
 def generate_files(template_variables):
     """Generate all HTML files from the template directory using the sitewide
     configuration"""
-    content_dir = os.path.join(os.getcwd(), 'content')
-    template_dir = os.path.join(os.getcwd(), 'templates')
-
-    all_posts = get_all_posts(content_dir)
+    all_posts = get_all_posts(template_variables['content_dir'])
     all_posts.sort(key=lambda i: i['date'], reverse=True)
     template_variables['site']['recent_posts'] = all_posts[:5]
+    template_variables['site']['all_posts'] = all_posts
     template_variables['env'] = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(template_dir))
-    generate_index(template_variables)
+            loader=jinja2.FileSystemLoader(template_variables['template_dir']))
+    generate_static_page(template_variables, 'index.html')
+    generate_static_page(template_variables, 'archives.html')
+    generate_static_page(template_variables, 'about.html')
 
     for index, post in enumerate(all_posts):
         post['post_previous'] = all_posts[index - 1]
         generate_post(post, template_variables)
 
 
-def create_post(title):
+def create_post(title, content_dir):
     """Create an empty post with the YAML front matter generated"""
     post_file_date = datetime.datetime.strftime(
             datetime.datetime.today(), '%Y %m %d')
@@ -120,7 +122,6 @@ def create_post(title):
 
     post_file_name = os.path.join(post_file_date.split()) + '-'.join(
             str.split(title)) + '.markdown'
-    content_dir = os.path.join(os.getcwd(), 'content')
     if os.path.exists(os.path.join(content_dir, post_file_name)):
         raise EnvironmentError(
                 '[{post}] already exists.'.format(post=post_file_name))
@@ -128,10 +129,12 @@ def create_post(title):
         post_file.write(POST_SKELETON.format(date=post_date, title=title))
 
 
-def copy_static_content():
+def copy_static_content(output_dir, root_dir):
     """Copy (if necessary) the static content to the appropriate directory"""
 
-    shutil.copytree('static', os.path.join(os.getcwd(), 'generated', 'static'))
+    if not os.path.exists(os.path.join(output_dir, 'static')):
+        shutil.copytree(os.path.join(root_dir, 'static'),
+                os.path.join(output_dir, 'static'))
 
 if __name__ == '__main__':
     argument_parser = argparse.ArgumentParser(
@@ -146,16 +149,33 @@ if __name__ == '__main__':
     arguments = argument_parser.parse_args()
 
     argument_dict = vars(arguments)
+
+    site_config = dict()
+    with open('config.yml', 'r') as config_file:
+        site_config = yaml.load(config_file.read())
+
+    def set_default_path(key, default):
+        site_config[key] = os.path.join(os.getcwd(),
+                site_config.setdefault(key, default))
+
+    set_default_path('root_dir', '')
+    set_default_path('output_dir', 'generated')
+    set_default_path('content_dir', 'content')
+    set_default_path('template_dir', 'templates')
+
+    if 'blog_prefix' in site_config['site']:
+        site_config['output_dir'] = os.path.join(
+                site_config['site']['blog_prefix'], site_config['output_dir'])
+
     if 'post_title' in argument_dict and argument_dict['post_title'] == True:
         print ('Creating post...')
-        create_post(argument_dict['post_title'])
+        create_post(argument_dict['post_title'], site_config['content_dir'])
     elif 'generate' in argument_dict and argument_dict['generate'] == True:
         print ('Generating...')
-        site_config = yaml.load(open('config.yml', 'r').read())
-        if os.path.exists(os.path.join(os.getcwd(), 'generated')):
-            shutil.rmtree(os.path.join(os.getcwd(), 'generated'))
-        os.mkdir(os.path.join(os.getcwd(), 'generated'))
+        if os.path.exists(site_config['output_dir']):
+            shutil.rmtree(site_config['output_dir'])
+        os.makedirs(site_config['output_dir'])
 
         generate_files(site_config)
-        copy_static_content()
+        copy_static_content(site_config['output_dir'], site_config['root_dir'])
     print ('Complete')
