@@ -94,6 +94,8 @@ def create_post(title):
     
     post_file_name = post_file_date + '-'.join(str.split(title)) + '.markdown'
     content_dir = os.path.join(os.getcwd(), 'content')
+    if os.path.exists(os.path.join(content_dir, post_file_name)):
+        raise EnvironmentError('[{post}] already exists.'.format(post=post_file_name))
     with open(os.path.join(content_dir, post_file_name), 'w') as post_file:
         post_file.write(POST_SKELETON.format(date=post_date, title=title))
 
