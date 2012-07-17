@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+  {% block content %}
+      <div class="blog-index">
+  
+  
+ {% for post in site.recent_posts %} 
+    <article>
+  <header>
+      <h1 class="entry-title"><a href="/blog/2012/07/10/software-optimization-a-systematic-approach/">Software Optimization: A Systematic Approach</a></h1>
+      <p class="meta">
+<time datetime="2012-07-10T05:25:00-04:00" pubdate data-updated="true">Jul 10<span>th</span>, 2012</time>
+      </p>
+  </header>
+  <div class="entry-content">
+{{ post.teaser }}
+</div>
+  
+    <footer>
+      <a rel="full-article" href="{{ post.canonical_url }}">Read on &rarr;</a>
+    </footer>
+    </article>
+{% endfor %}  
+  <div class="pagination">
+    
+      <a class="prev" href="/blog/page//page/2/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+{% endblock %}

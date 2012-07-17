@@ -38,8 +38,7 @@ def generate_post_filepath(title, date):
 
 
 def get_all_posts(content_dir):
-    """Return a list of dictionaries each of the markdown converted
-    posts and its associated metadata"""
+    """Return a list of dictionaries representing converted posts"""
     input_files = os.listdir(content_dir)
     all_posts = list()
 
@@ -55,6 +54,9 @@ def get_all_posts(content_dir):
 
         # Generate HTML from Markdown
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
+
+        (teaser, _, _) = post['body'].partition('<!--more-->')
+        post['teaser'] = teaser
         post['relative_url'] = generate_post_filepath(
                 post['title'], post['date'])
 
@@ -65,7 +67,6 @@ def get_all_posts(content_dir):
 def generate_post(post, template_variables):
     """Generate a single post's HTML file"""
     output_dir = os.path.join(os.getcwd(), 'generated')
-    template_dir = os.path.join(os.getcwd(), 'templates')
 
     if not post['body']:
         raise EnvironmentError('No content for post [{post}] found.'.format(
@@ -73,29 +74,37 @@ def generate_post(post, template_variables):
     post['description'] = post['body'].split()[0]
     post['post'] = post
 
-    template_file_buffer = str()
-    with open(os.path.join(template_dir, 'post.html'), 'r') as template_file:
-        template_file_buffer = template_file.read()
-
     template_variables.update(post)
-    final_html = jinja2.Template(
-            template_file_buffer).render(template_variables)
+    template = template_variables['env'].get_template('post.html')
+    final_html = template.render(template_variables)
     output_path = os.path.dirname(post['relative_url'])
-    print (output_path)
     if not os.path.exists(output_path):
         os.makedirs(os.path.join(output_dir, output_path))
     open(os.path.join(output_dir,
         post['relative_url']), 'w').write(final_html)
 
 
+def generate_index(template_variables):
+    """Generate the index page"""
+    output_dir = os.path.join(os.getcwd(), 'generated')
+    template = template_variables['env'].get_template('index.html')
+    resulting_html = template.render(template_variables)
+    with open(os.path.join(output_dir, 'index.html'), 'w') as output_file:
+        output_file.write(resulting_html)
+
+
 def generate_files(template_variables):
     """Generate all HTML files from the template directory using the sitewide
     configuration"""
     content_dir = os.path.join(os.getcwd(), 'content')
+    template_dir = os.path.join(os.getcwd(), 'templates')
 
     all_posts = get_all_posts(content_dir)
     all_posts.sort(key=lambda i: i['date'], reverse=True)
     template_variables['site']['recent_posts'] = all_posts[:5]
+    template_variables['env'] = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(template_dir))
+    generate_index(template_variables)
 
     for index, post in enumerate(all_posts):
         post['post_previous'] = all_posts[index - 1]
@@ -111,7 +120,6 @@ def create_post(title):
 
     post_file_name = os.path.join(post_file_date.split()) + '-'.join(
             str.split(title)) + '.markdown'
-    print (post_file_name)
     content_dir = os.path.join(os.getcwd(), 'content')
     if os.path.exists(os.path.join(content_dir, post_file_name)):
         raise EnvironmentError(
@@ -150,3 +158,4 @@ if __name__ == '__main__':
 
         generate_files(site_config)
         copy_static_content()
+    print ('Complete')
