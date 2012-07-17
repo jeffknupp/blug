@@ -34,7 +34,7 @@ def generate_post_filepath(title, date):
     post_file_date = datetime.datetime.strftime(date, '%Y/%m/%d/')
     title = ''.join(char for char in title.lower() if (
         char.isalnum() or char == ' '))
-    return post_file_date + '/'.join(str.split(title)) + '/index.html'
+    return post_file_date + title.replace(' ', '-') + '/index.html'
 
 
 def get_all_posts(content_dir):
@@ -54,6 +54,9 @@ def get_all_posts(content_dir):
 
         # Generate HTML from Markdown
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
+        post['categories'] = post['categories'].split()
+        for category in categories:
+            all_posts['categories'].append(post['title'])
 
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
@@ -66,7 +69,7 @@ def get_all_posts(content_dir):
 
 def generate_post(post, template_variables):
     """Generate a single post's HTML file"""
-    output_dir = template_variables['output_dir']
+    output_dir = template_variables['blog_dir']
 
     if not post['body']:
         raise EnvironmentError('No content for post [{post}] found.'.format(
@@ -84,13 +87,14 @@ def generate_post(post, template_variables):
         post['relative_url']), 'w').write(final_html)
 
 
-def generate_static_page(template_variables, page_name, template_name=None):
+
+def generate_static_page(template_variables, output_dir, template_name='index.html'):
     """Generate static pages"""
-    if not template_name:
-        template_name = page_name
-    template = template_variables['env'].get_template(page_name)
+    template = template_variables['env'].get_template(template_name)
     resulting_html = template.render(template_variables)
-    with open(os.path.join(template_variables['output_dir'], template_name),
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    with open(os.path.join(output_dir, 'index.html'),
             'w') as output_file:
         output_file.write(resulting_html)
 
@@ -100,13 +104,21 @@ def generate_files(template_variables):
     configuration"""
     all_posts = get_all_posts(template_variables['content_dir'])
     all_posts.sort(key=lambda i: i['date'], reverse=True)
-    template_variables['site']['recent_posts'] = all_posts[:5]
-    template_variables['site']['all_posts'] = all_posts
+    template_variables['recent_posts'] = all_posts[:5]
+    template_variables['all_posts'] = all_posts
     template_variables['env'] = jinja2.Environment(
             loader=jinja2.FileSystemLoader(template_variables['template_dir']))
-    generate_static_page(template_variables, 'index.html')
-    generate_static_page(template_variables, 'archives.html')
-    generate_static_page(template_variables, 'about.html')
+    generate_static_page(template_variables, template_variables['blog_dir'], 'index.html')
+    generate_static_page(template_variables, os.path.join(template_variables['blog_dir'], 'archives'), 'archives.html')
+    generate_static_page(template_variables, os.path.join(template_variables['output_dir'], 'about-me'), 'about.html')
+    generate_static_page(template_variables, os.path.join(template_variables['output_dir'], 'about-me'), 'about.html')
+    for index in range(5, len(all_posts), 5):
+        template_variables['all_posts'] = all_posts[index:index+5]
+        page_number = str(int(len(all_posts) / index) + 1)
+        # Somehow I must have set paths incorrectly in Octopress and ended up with this stupid
+        # directory structure
+        output_dir = os.path.join(template_variables['blog_dir'], 'page', 'page', page_number)
+        generate_static_page(template_variables, output_dir, 'index.html')
 
     for index, post in enumerate(all_posts):
         post['post_previous'] = all_posts[index - 1]
@@ -132,9 +144,10 @@ def create_post(title, content_dir):
 def copy_static_content(output_dir, root_dir):
     """Copy (if necessary) the static content to the appropriate directory"""
 
-    if not os.path.exists(os.path.join(output_dir, 'static')):
-        shutil.copytree(os.path.join(root_dir, 'static'),
-                os.path.join(output_dir, 'static'))
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+        print ('Removing old content...')
+    shutil.copytree(os.path.join(root_dir, 'static'), output_dir)
 
 if __name__ == '__main__':
     argument_parser = argparse.ArgumentParser(
@@ -154,28 +167,15 @@ if __name__ == '__main__':
     with open('config.yml', 'r') as config_file:
         site_config = yaml.load(config_file.read())
 
-    def set_default_path(key, default):
-        site_config[key] = os.path.join(os.getcwd(),
-                site_config.setdefault(key, default))
-
-    set_default_path('root_dir', '')
-    set_default_path('output_dir', 'generated')
-    set_default_path('content_dir', 'content')
-    set_default_path('template_dir', 'templates')
-
-    if 'blog_prefix' in site_config['site']:
-        site_config['output_dir'] = os.path.join(
-                site_config['site']['blog_prefix'], site_config['output_dir'])
+    site_config['root_dir'] = os.getcwd()
+    site_config['blog_dir'] = os.path.join(site_config['output_dir'],
+            site_config['blog_prefix'])
 
     if 'post_title' in argument_dict and argument_dict['post_title'] == True:
         print ('Creating post...')
         create_post(argument_dict['post_title'], site_config['content_dir'])
     elif 'generate' in argument_dict and argument_dict['generate'] == True:
         print ('Generating...')
-        if os.path.exists(site_config['output_dir']):
-            shutil.rmtree(site_config['output_dir'])
-        os.makedirs(site_config['output_dir'])
-
-        generate_files(site_config)
         copy_static_content(site_config['output_dir'], site_config['root_dir'])
+        generate_files(site_config)
     print ('Complete')

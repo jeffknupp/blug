@@ -1,14 +1,17 @@
-site: 
-  github_user: jeffknupp
-  clicky_id: 66535137
-  disqus_shortname: jeffknupp
-  facebook_appid: 212934732101925
-  twitter_user: jeffknupp
-  google_analytics_id: UA-12615441-1
-  feed_url: http://feeds.feedburner.com/hackersgonnahack
-  domain: jeffknupp.com
-  url: http://www.jeffknupp.com
-  blog_prefix: blog
-  title: Hackers Gonna Hack
-  tag_line: On Hacking and Hustling
-  author: Jeff Knupp
+github_user: jeffknupp
+clicky_id: 66535137
+disqus_shortname: jeffknupp
+facebook_appid: 212934732101925
+twitter_user: jeffknupp
+google_analytics_id: UA-12615441-1
+feed_url: http://feeds.feedburner.com/hackersgonnahack
+domain: jeffknupp.com
+url: http://www.jeffknupp.com
+blog_prefix: blog
+title: Hackers Gonna Hack
+tag_line: On Hacking and Hustling
+author: Jeff Knupp
+output_dir: generated
+blog_prefix: blog
+content_dir: content
+template_dir: templates

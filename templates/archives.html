@@ -14,14 +14,14 @@
 
   
   <h2>2012</h2>
-  {% for post in site.all_posts %}
+  {% for post in all_posts %}
 <article>
   
 <h1><a href="{{ post.relative_url }}">{{ post.title }}</a></h1>
 <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime('%Y-%m-%d %I:%M') }}</time>
 <footer>
     {% for category in post.categories %}
-    <a class='category' href='/blog/categories/{{ category.slug }}/'>{{ category.title }}</a>,
+    <a class='category' href='/blog/categories/{{ category }}/'>{{ category }}</a>,
     {% endfor %}
 </footer>
 {% endfor %}
