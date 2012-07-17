@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8">
   <title>{{ post.title }} </title>
-  <meta name="author" content="{{ post.author }}">
+  <meta name="author" content="{{ site.author }}">
 
   
   <meta name="description" content="{{ post.description }} &hellip;"> 
@@ -95,7 +95,7 @@
   
 
 
-      <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime('%H') }}</time>
+      <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime('%Y-%m-%d %I:%M') }}</time>
         
       </p>
     
@@ -110,7 +110,7 @@
       
   
 
-    <span class="byline author vcard">Posted by <span class="fn">{{ post.author }}</span></span>
+    <span class="byline author vcard">Posted by <span class="fn">{{ site.author }}</span></span>
 
       
 
@@ -124,7 +124,7 @@
   
 
 
-    <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime(' %H ') }}</time>
+    <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime(' %Y-%m-%d %I:%M ') }}</time>
       
 
 <span class="categories">
@@ -237,7 +237,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2012 - {{ post.author }}-
+  Copyright &copy; 2012 - {{ site.author }}-
   <span class="credit">Powered by <a href="http://www.github.com/jeffknupp/blog">bleg</a></span>
 </p>
 

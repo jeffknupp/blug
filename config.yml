@@ -11,3 +11,4 @@ site:
   title: Hackers Gonna Hack
   tag_line: On Hacking and Hustling
   permalink: /blog/:year/:month/:day/:title/
+  author: Jeff Knupp
