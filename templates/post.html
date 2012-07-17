@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+        {% block canonical_url %}{{ post.canonical_url }}{% endblock %}
         {% block content %}
       <div>
 <article class="hentry" role="article">
@@ -22,11 +23,11 @@
 </span>
     </p>
       <div class="sharing">
-          <a href="http://twitter.com/share" class="twitter-share-button" data-url="{{ post.canconical_url }}" data-via="{{ twitter_user }}" data-counturl="{{ post.canconical_url }}" >Tweet</a>
+          <a href="http://twitter.com/share" class="twitter-share-button" data-url="{{ post.canonical_url }}" data-via="{{ twitter_user }}" data-counturl="{{ post.canonical_url }}" >Tweet</a>
     <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
 </div>
     <p class="meta">
-    <a class="basic-alignment left" href="{{ post_previous.relative_url }}" title="Previous Post: {{ post_previous.title }}">&laquo; {{ post_previous.title }}</a>
+    <a class="basic-alignment left" href="{{ post.post_previous.relative_url }}" title="Previous Post: {{ post.post_previous.title }}">&laquo; {{ post.post_previous.title }}</a>
     </p>
   </footer>
 </article>
@@ -35,8 +36,4 @@
     <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
   </section>
-
-</div>
-    </div>
-  </div>
-{% endblock %} 
+{% endblock content %} 

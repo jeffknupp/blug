@@ -8,14 +8,13 @@ import datetime
 import shutil
 import argparse
 
-# categories:
 # recent_posts:
 # post.title
 # post.author
 # post.description
 # post.date
 # post.body
-# post.canconical_url
+# post.canonical_url
 # post_previous.relative_url
 # post_previous.title
 # post.relative_url
@@ -24,8 +23,6 @@ import argparse
 POST_SKELETON = """
 title: "{title}"
 date: {date}
-comments: true
-categories:
 ---
 """
 
@@ -34,10 +31,10 @@ def generate_post_filepath(title, date):
     post_file_date = datetime.datetime.strftime(date, '%Y/%m/%d/')
     title = ''.join(char for char in title.lower() if (
         char.isalnum() or char == ' '))
-    return post_file_date + title.replace(' ', '-') + '/index.html'
+    return post_file_date + title.replace(' ', '-') + '/'
 
 
-def get_all_posts(content_dir):
+def get_all_posts(content_dir, prefix, canonical_url):
     """Return a list of dictionaries representing converted posts"""
     input_files = os.listdir(content_dir)
     all_posts = list()
@@ -54,37 +51,39 @@ def get_all_posts(content_dir):
 
         # Generate HTML from Markdown
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
-        post['categories'] = post['categories'].split()
-        for category in categories:
-            all_posts['categories'].append(post['title'])
-
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
-        post['relative_url'] = generate_post_filepath(
-                post['title'], post['date'])
+        post['relative_path'] = os.path.join(prefix, generate_post_filepath(
+                post['title'], post['date']))
+
+        post['relative_url'] = '/' + post['relative_path'] 
+        post['canonical_url'] = canonical_url + post['relative_url']
 
         all_posts.append(post)
     return all_posts
 
 
+def create_path_to_file(path):
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 def generate_post(post, template_variables):
     """Generate a single post's HTML file"""
-    output_dir = template_variables['blog_dir']
+    output_path = os.path.join(template_variables['output_dir'], post['relative_path'], 'index.html')
 
     if not post['body']:
         raise EnvironmentError('No content for post [{post}] found.'.format(
-            post=post['relative_url']))
+            post=post['relative_path']))
     post['description'] = post['body'].split()[0]
-    post['post'] = post
+    post_vars = {'post': post}
 
-    template_variables.update(post)
+    template_variables.update(post_vars)
     template = template_variables['env'].get_template('post.html')
     final_html = template.render(template_variables)
-    output_path = os.path.dirname(post['relative_url'])
-    if not os.path.exists(output_path):
-        os.makedirs(os.path.join(output_dir, output_path))
-    open(os.path.join(output_dir,
-        post['relative_url']), 'w').write(final_html)
+    create_path_to_file(output_path)
+    open(output_path, 'w').write(final_html)
 
 
 
@@ -102,22 +101,21 @@ def generate_static_page(template_variables, output_dir, template_name='index.ht
 def generate_files(template_variables):
     """Generate all HTML files from the template directory using the sitewide
     configuration"""
-    all_posts = get_all_posts(template_variables['content_dir'])
+    all_posts = get_all_posts(template_variables['content_dir'], template_variables['blog_prefix'], template_variables['url'])
     all_posts.sort(key=lambda i: i['date'], reverse=True)
     template_variables['recent_posts'] = all_posts[:5]
     template_variables['all_posts'] = all_posts
     template_variables['env'] = jinja2.Environment(
             loader=jinja2.FileSystemLoader(template_variables['template_dir']))
+    generate_static_page(template_variables, template_variables['output_dir'], 'index.html')
     generate_static_page(template_variables, template_variables['blog_dir'], 'index.html')
     generate_static_page(template_variables, os.path.join(template_variables['blog_dir'], 'archives'), 'archives.html')
     generate_static_page(template_variables, os.path.join(template_variables['output_dir'], 'about-me'), 'about.html')
-    generate_static_page(template_variables, os.path.join(template_variables['output_dir'], 'about-me'), 'about.html')
-    for index in range(5, len(all_posts), 5):
-        template_variables['all_posts'] = all_posts[index:index+5]
-        page_number = str(int(len(all_posts) / index) + 1)
-        # Somehow I must have set paths incorrectly in Octopress and ended up with this stupid
-        # directory structure
-        output_dir = os.path.join(template_variables['blog_dir'], 'page', 'page', page_number)
+    current_page = 1
+    for page in [all_posts[index:index+5] for index in range (5, len(all_posts), 5)]:
+        current_page += 1
+        template_variables['all_posts'] = page
+        output_dir = os.path.join(template_variables['blog_dir'], 'page', str(current_page))
         generate_static_page(template_variables, output_dir, 'index.html')
 
     for index, post in enumerate(all_posts):

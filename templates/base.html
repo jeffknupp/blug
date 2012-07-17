@@ -16,12 +16,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="{{ url }} ">
-  <link href="static/favicon.png" rel="icon">
-  <link href="static/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script src="static/javascripts/modernizr-2.0.js"></script>
-  <script src="static/javascripts/ender.js"></script>
-  <script src="static/javascripts/octopress.js" type="text/javascript"></script>
+  <link rel="canonical" href="{% block canonical_url %}{{ url }}{% endblock %}">
+  <link href="/{{ blog_prefix}}/favicon.png" rel="icon">
+  <link href="/{{ blog_prefix}}/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/{{ blog_prefix}}/javascripts/modernizr-2.0.js"></script>
+  <script src="/{{ blog_prefix}}/javascripts/ender.js"></script>
+  <script src="/{{ blog_prefix}}/javascripts/octopress.js" type="text/javascript"></script>
   <link href="{{ feed_url }}" rel="alternate" title="{{ title }}" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
@@ -80,9 +80,9 @@
  {% for post in recent_posts %} 
     <article>
   <header>
-      <h1 class="entry-title"><a href="/blog/2012/07/10/software-optimization-a-systematic-approach/">Software Optimization: A Systematic Approach</a></h1>
+  <h1 class="entry-title"><a href="{{ post.relative_url }}">{{ post.title }}</a></h1>
       <p class="meta">
-<time datetime="2012-07-10T05:25:00-04:00" pubdate data-updated="true">Jul 10<span>th</span>, 2012</time>
+    <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime(' %Y-%m-%d %I:%M ') }}</time>
       </p>
   </header>
   <div class="entry-content">
@@ -90,7 +90,7 @@
 </div>
   
     <footer>
-      <a rel="full-article" href="{{ post.canonical_url }}">Read on &rarr;</a>
+      <a rel="full-article" href="{{ post.relative_url }}">Read on &rarr;</a>
     </footer>
     </article>
 {% endfor %}  
@@ -102,7 +102,7 @@
     
   </div>
 </div>
-{% endblock %}
+{% endblock content %}
 {% block sidebar %}
 <aside class="sidebar">
   
