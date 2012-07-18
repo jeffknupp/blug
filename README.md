@@ -13,26 +13,26 @@ your site and insert content when triggered by external events. Stuff like dynam
 to comments on your post on HackerNews or reddit when Blug sees this event has occurred. Or re-generating to scale back the included css/javascript when Blug sees your webserver is getting hammered. These are the kinds of things I'm interested in exploring.
 
 ## Installation ##
-Blug currently requires no installation, though running '''python setup.py install''' 
-will create 'install' the blug.py script. You can also get it from pip using '''pip install blug'''.
+Blug currently requires no installation, though running ```python setup.py install``` 
+will create 'install' the blug.py script. You can also get it from pip using ```pip install blug```.
 
 ## Usage ##
-Edit the '''config.yaml''' file with values appropriate for your site. They should be pretty self-explanatory.
-Once done, place your posts in a directory called '''content''' (this is the default location Blug checks for
+Edit the ```config.yaml``` file with values appropriate for your site. They should be pretty self-explanatory.
+Once done, place your posts in a directory called ```content``` (this is the default location Blug checks for
 posts). Each post follows the Octopress/Jekyll naming convention for posts: year-month-day-title-of-post-as-slug.
-Once you've got everything set up, there are three components to the '''blug.py''' script.
+Once you've got everything set up, there are three components to the ```blug.py``` script.
 
 ### Creating a New Post ###
-'''python blug.py post 'How Javascript is Ruining a Generation of Programmers' ''' This will create a new post
-in your '''content''' directory with the appropriate filename and yaml front matter. 
+```python blug.py post 'How Javascript is Ruining a Generation of Programmers' ``` This will create a new post
+in your ```content``` directory with the appropriate filename and yaml front matter. 
 
 ### Generating the Site ###
-'''python blug.py generate''' This **deletes and regenerates the current generated content**. Run this whenever you
-make a change to a post or after finishing a new one. The output in the '''generated''' directory is the complete site.
+```python blug.py generate``` This **deletes and regenerates the current generated content**. Run this whenever you
+make a change to a post or after finishing a new one. The output in the ```generated``` directory is the complete site.
 
 ### Viewing Your Site Locally ###
-'''python blug.py serve <port> <host> <path>''' This starts a webserver locally to allow you to preview your site. Use
-'''generated''' as the '''path''' argument to serve files using your generated site as the root.
+```python blug.py serve <port> <host> <path>``` This starts a webserver locally to allow you to preview your site. Use
+```generated``` as the ```path``` argument to serve files using your generated site as the root.
 
 ## Coming Soon ##
 A number of features have either been committed or are in the process of being committed
