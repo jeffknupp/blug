@@ -6,7 +6,7 @@ twitter_user: jeffknupp
 google_analytics_id: UA-12615441-1
 feed_url: http://feeds.feedburner.com/hackersgonnahack
 domain: jeffknupp.com
-url: http://cib-tmsd01.usa.wachovia.net:8080/ #http://www.jeffknupp.com
+url: http://www.jeffknupp.com
 blog_root: ~a823222
 blog_prefix: blog
 title: Hackers Gonna Hack
