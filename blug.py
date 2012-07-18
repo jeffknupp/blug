@@ -34,7 +34,7 @@ def generate_post_filepath(title, date):
     return post_file_date + title.replace(' ', '-') + '/'
 
 
-def get_all_posts(content_dir, prefix, canonical_url):
+def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
     """Return a list of dictionaries representing converted posts"""
     input_files = os.listdir(content_dir)
     all_posts = list()
@@ -53,10 +53,10 @@ def get_all_posts(content_dir, prefix, canonical_url):
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
-        post['relative_path'] = os.path.join(prefix, generate_post_filepath(
+        post['relative_path'] = os.path.join(blog_prefix, generate_post_filepath(
                 post['title'], post['date']))
 
-        post['relative_url'] = '/' + post['relative_path'] 
+        post['relative_url'] = os.path.join('/', blog_root, post['relative_path'])
         post['canonical_url'] = canonical_url + post['relative_url']
 
         all_posts.append(post)
@@ -101,7 +101,8 @@ def generate_static_page(template_variables, output_dir, template_name='index.ht
 def generate_files(template_variables):
     """Generate all HTML files from the template directory using the sitewide
     configuration"""
-    all_posts = get_all_posts(template_variables['content_dir'], template_variables['blog_prefix'], template_variables['url'])
+    all_posts = get_all_posts(template_variables['content_dir'], template_variables['blog_prefix'], template_variables['url'],
+        template_variables['blog_root'])
     all_posts.sort(key=lambda i: i['date'], reverse=True)
     template_variables['recent_posts'] = all_posts[:5]
     template_variables['all_posts'] = all_posts

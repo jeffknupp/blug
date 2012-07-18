@@ -17,11 +17,11 @@
 
   
   <link rel="canonical" href="{% block canonical_url %}{{ url }}{% endblock %}">
-  <link href="/{{ blog_prefix}}/favicon.png" rel="icon">
-  <link href="/{{ blog_prefix}}/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script src="/{{ blog_prefix}}/javascripts/modernizr-2.0.js"></script>
-  <script src="/{{ blog_prefix}}/javascripts/ender.js"></script>
-  <script src="/{{ blog_prefix}}/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/{{ blog_root }}/favicon.png" rel="icon">
+  <link href="/{{ blog_root }}/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/{{ blog_root }}/javascripts/modernizr-2.0.js"></script>
+  <script src="/{{ blog_root }}/javascripts/ender.js"></script>
+  <script src="/{{ blog_root }}/javascripts/octopress.js" type="text/javascript"></script>
   <link href="{{ feed_url }}" rel="alternate" title="{{ title }}" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
@@ -66,8 +66,8 @@
   
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-  <li><a href="/about-me/">About Me</a></li>
+  <li><a href="/{{ blog_root}}/{{ blog_prefix }}/archives">Archives</a></li>
+  <li><a href="/{{ blog_root}}/about-me/">About Me</a></li>
 </ul>
 
 </nav>
@@ -169,7 +169,7 @@
 
   
 </aside>
-{% endblock %}
+{% endblock sidebar %}
     </div>
   </div>
   {% block footer %}
