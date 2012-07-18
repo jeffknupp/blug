@@ -8,18 +8,6 @@ import datetime
 import shutil
 import argparse
 
-# recent_posts:
-# post.title
-# post.author
-# post.description
-# post.date
-# post.body
-# post.canonical_url
-# post_previous.relative_url
-# post_previous.title
-# post.relative_url
-# post.canonical_url
-
 POST_SKELETON = """
 title: "{title}"
 date: {date}
@@ -32,7 +20,7 @@ def generate_post_filepath(title, date):
     post_file_date = datetime.datetime.strftime(date, '%Y/%m/%d/')
     title = ''.join(char for char in title.lower() if (
         char.isalnum() or char == ' '))
-    return post_file_date + title.replace(' ', '-') + '/'
+    return post_file_date + title.replace(' ', '-')
 
 
 def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
@@ -45,20 +33,40 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
         with open(os.path.join(content_dir, post_file_name), 'r') as post_file:
             post_file_buffer = post_file.read()
 
+        # Split the file into the YAML front matter and the post proper
         (front_matter, _, post_body) = post_file_buffer.partition('\n---\n')
         post = yaml.load(front_matter)
-        post['date'] = datetime.datetime.strptime(
-                (post['date'].strip()), '%Y-%m-%d %H:%M')
 
-        # Generate HTML from Markdown
+        # Generate HTML from Markdown, splitting between the teaser (the
+        # content to display on the front page until <!--more--> is reached)
+        # and the post proper
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
-        post['relative_path'] = os.path.join(blog_prefix,
-                generate_post_filepath(post['title'], post['date']))
 
-        post['relative_url'] = os.path.join('/', blog_root,
-                post['relative_path'])
+        # Construct datetime from the *incredibly useful* string YAML
+        # provides
+        post['date'] = datetime.datetime.strptime(
+                (post['date'].strip()), '%Y-%m-%d %H:%M')
+
+        # In general we know the layout on disk much match the generated urls
+        # This doesn't hold in the case that there is an appendix to the
+        # domain that the site resides on. For example, if my WidgetFactory
+        # marketing department blog lived at
+        # www.widgetfactory.com/marketing/blog/, we would generate the
+        # files in the /blog sub-directory but the links would need to
+        # include /marketing/blog
+        post['relative_path'] = generate_post_filepath(post['title'],
+                post['date']) + '/'
+        if blog_prefix:
+            post['relative_path'] = os.path.join(
+                    blog_prefix, post['relative_path'])
+
+        post['relative_url'] = post['relative_path']
+        if blog_root:
+            post['relative_url'] = os.path.join(
+                    '/', blog_root, post['relative_url'])
+
         post['canonical_url'] = canonical_url + post['relative_url']
 
         all_posts.append(post)
@@ -66,8 +74,8 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
 
 
 def create_path_to_file(path):
-    """Given a path, make sure all intermediate directories exiss and
-    create them if they don't"""
+    """Given a path, make sure all intermediate directories exist; create
+    them if they don't"""
     directory = os.path.dirname(path)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -81,86 +89,103 @@ def generate_post(post, template_variables):
     if not post['body']:
         raise EnvironmentError('No content for post [{post}] found.'.format(
             post=post['relative_path']))
+
+    # Probably need a better value for 'description', but this will
+    # do for now
     post['description'] = post['body'].split()[0]
+    # Need to keep 'post' and 'site' variables separate
     post_vars = {'post': post}
 
     template_variables.update(post_vars)
     template = template_variables['env'].get_template('post.html')
-    final_html = template.render(template_variables)
     create_path_to_file(output_path)
-    open(output_path, 'w').write(final_html)
+    with open(output_path, 'w') as output:
+        output.write(template.render(template_variables))
 
 
-def generate_static_page(template_variables, output_dir,
-        template_name='index.html'):
-    """Generate static pages"""
+def generate_static_page(template_variables, output_dir, template_name):
+    """Generate a static page"""
     template = template_variables['env'].get_template(template_name)
-    resulting_html = template.render(template_variables)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    with open(os.path.join(output_dir, 'index.html'),
-            'w') as output_file:
-        output_file.write(resulting_html)
+    create_path_to_file(output_dir)
+    with open(os.path.join(output_dir, 'index.html'), 'w') as output_file:
+        output_file.write(template.render(template_variables))
 
 
-def generate_files(template_variables):
-    """Generate all HTML files from the template directory using the sitewide
-    configuration"""
-    all_posts = get_all_posts(template_variables['content_dir'],
-            template_variables['blog_prefix'], template_variables['url'],
-            template_variables['blog_root'])
-    all_posts.sort(key=lambda i: i['date'], reverse=True)
-    template_variables['recent_posts'] = all_posts[:5]
-    template_variables['all_posts'] = all_posts
-    template_variables['env'] = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(template_variables['template_dir']))
-    generate_static_page(template_variables,
-            template_variables['output_dir'], 'index.html')
-    generate_static_page(template_variables,
-            template_variables['blog_dir'], 'index.html')
-    generate_static_page(template_variables,
-            os.path.join(template_variables['blog_dir'],
+def generate_static_files(site_config):
+    """Generate all 'static' files, files not based on markdown conversion"""
+    # Not sure if this is Octopress silliness, but generate an index.html
+    # at both the root level and the 'blog' level, so both www.foo.com and
+    # www.foo.com/blog can serve the blog
+    generate_static_page(site_config,
+            site_config['output_dir'], 'index.html')
+    generate_static_page(site_config,
+            site_config['blog_dir'], 'index.html')
+    generate_static_page(site_config,
+            os.path.join(site_config['blog_dir'],
                 'archives'), 'archives.html')
-    generate_static_page(template_variables,
-            os.path.join(template_variables['output_dir'],
+    generate_static_page(site_config,
+            os.path.join(site_config['output_dir'],
                 'about-me'), 'about.html')
+
+
+def generate_pagination_pages(site_config):
+    """Generate the additional index.html files required for pagination"""
     current_page = 1
+    all_posts = site_config['all_posts']
     for page in [all_posts[index:index + 5] for index in range(
         5, len(all_posts), 5)]:
         current_page += 1
-        template_variables['all_posts'] = page
-        output_dir = os.path.join(template_variables['blog_dir'],
+        # Since we're reusing the index.html template, make it think
+        # these posts are the only ones
+        site_config['all_posts'] = page
+        output_dir = os.path.join(site_config['blog_dir'],
                 'page', str(current_page))
-        generate_static_page(template_variables, output_dir, 'index.html')
+        generate_static_page(site_config, output_dir, 'index.html')
+
+
+def generate_all_files(site_config):
+    """Generate all HTML files from the content directory using the sitewide
+    configuration"""
+    all_posts = get_all_posts(site_config['content_dir'],
+            site_config['blog_prefix'], site_config['url'],
+            site_config['blog_root'])
+    all_posts.sort(key=lambda i: i['date'], reverse=True)
+
+    site_config['recent_posts'] = all_posts[:5]
+    site_config['all_posts'] = all_posts
+    site_config['env'] = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(site_config['template_dir']))
+
+    generate_static_files(site_config)
+    generate_pagination_pages(site_config)
 
     for index, post in enumerate(all_posts):
         post['post_previous'] = all_posts[index - 1]
-        generate_post(post, template_variables)
-
-
-def create_post(title, content_dir):
-    """Create an empty post with the YAML front matter generated"""
-    post_file_date = datetime.datetime.strftime(
-            datetime.datetime.today(), '%Y %m %d')
-    post_date = datetime.datetime.strftime(
-            datetime.datetime.today(), '%Y-%m-%d %H:%M')
-
-    post_file_name = os.path.join(post_file_date.split()) + '-'.join(
-            str.split(title)) + '.markdown'
-    if os.path.exists(os.path.join(content_dir, post_file_name)):
-        raise EnvironmentError(
-                '[{post}] already exists.'.format(post=post_file_name))
-    with open(os.path.join(content_dir, post_file_name), 'w') as post_file:
-        post_file.write(POST_SKELETON.format(date=post_date, title=title))
+        generate_post(post, site_config)
 
 
 def copy_static_content(output_dir, root_dir):
     """Copy (if necessary) the static content to the appropriate directory"""
-
     if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
         print ('Removing old content...')
+        shutil.rmtree(output_dir)
     shutil.copytree(os.path.join(root_dir, 'static'), output_dir)
+
+
+def create_post(title, content_dir):
+    """Create an empty post with the YAML front matter generated"""
+    post_file_name = generate_post_filepath(title, datetime.datetime.now())
+    post_file_name = post_file_name.replace('/', '-') + '.md'
+
+    post_date = datetime.datetime.strftime(
+            datetime.datetime.now(), '%Y-%m-%d %H:%M')
+
+    if os.path.exists(os.path.join(content_dir, post_file_name)):
+        raise EnvironmentError(
+                '[{post}] already exists.'.format(post=post_file_name))
+
+    with open(os.path.join(content_dir, post_file_name), 'w') as post_file:
+        post_file.write(POST_SKELETON.format(date=post_date, title=title))
 
 
 def main():
@@ -187,14 +212,14 @@ def main():
     site_config['blog_dir'] = os.path.join(site_config['output_dir'],
             site_config['blog_prefix'])
 
-    if 'post_title' in argument_dict and argument_dict['post_title'] == True:
+    if argument_dict.get('post_title', False):
         print ('Creating post...')
         create_post(argument_dict['post_title'], site_config['content_dir'])
-    elif 'generate' in argument_dict and argument_dict['generate'] == True:
+    if argument_dict.get('generate', False):
         print ('Generating...')
         copy_static_content(site_config['output_dir'], site_config['root_dir'])
-        generate_files(site_config)
-    print ('Complete')
+        generate_all_files(site_config)
+        print ('Complete')
 
 
 if __name__ == '__main__':
