@@ -211,7 +211,7 @@ def create_new_post(arguments):
     site_config = dict()
     with open('config.yml', 'r') as config_file:
         site_config = yaml.load(config_file.read())
-    create_post(arguments['post_title'], site_config['content_dir'])
+    create_post(arguments['title'], site_config['content_dir'])
 
 
 def generate_site(arguments):
