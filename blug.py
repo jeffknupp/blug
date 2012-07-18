@@ -188,38 +188,76 @@ def create_post(title, content_dir):
         post_file.write(POST_SKELETON.format(date=post_date, title=title))
 
 
-def main():
-    """Main execution of blug"""
-    argument_parser = argparse.ArgumentParser(
-            description='Generate a static HTML blog from \
-                    Markdown blog entries')
-    command_group = argument_parser.add_mutually_exclusive_group()
-    command_group.add_argument('-p, --post', action='store',
-            dest='post_title', help='Create a new post with the \
-                    title of this option\'s argument')
-    command_group.add_argument('-g, --generate', dest='generate',
-            action='store_true', help='Generate the complete static site \
-                    using the posts in the \'content\' directory')
-    arguments = argument_parser.parse_args()
+def serve(arguments):
+    """Serve static HTML pages indefinately"""
+    import http.server
+    import socketserver
 
-    argument_dict = vars(arguments)
+    os.chdir((arguments['path']))
+    handler = http.server.SimpleHTTPRequestHandler
 
+    httpd = socketserver.TCPServer((arguments['host'], int(arguments['port'])),
+            handler)
+
+    print("serving at port", arguments['port'])
+    httpd.serve_forever()
+
+
+def create_new_post(arguments):
+    """pass"""
+    site_config = dict()
+    with open('config.yml', 'r') as config_file:
+        site_config = yaml.load(config_file.read())
+    create_post(arguments['post_title'], site_config['content_dir'])
+
+
+def generate_site(arguments):
+    """pass"""
     site_config = dict()
     with open('config.yml', 'r') as config_file:
         site_config = yaml.load(config_file.read())
 
     site_config['root_dir'] = os.getcwd()
     site_config['blog_dir'] = os.path.join(site_config['output_dir'],
-            site_config['blog_prefix'])
+        site_config['blog_prefix'])
+    print ('Generating...')
+    copy_static_content(site_config['output_dir'], site_config['root_dir'])
+    generate_all_files(site_config)
 
-    if argument_dict.get('post_title', False):
-        print ('Creating post...')
-        create_post(argument_dict['post_title'], site_config['content_dir'])
-    if argument_dict.get('generate', False):
-        print ('Generating...')
-        copy_static_content(site_config['output_dir'], site_config['root_dir'])
-        generate_all_files(site_config)
-        print ('Complete')
+
+def main():
+    """Main execution of blug"""
+    argument_parser = argparse.ArgumentParser(
+            description='Generate a static HTML blog from \
+                    Markdown blog entries')
+    subparser = argument_parser.add_subparsers(help='help for sub-commands')
+
+    post_parser = subparser.add_parser('post', help='Create a blank blog post')
+    post_parser.add_argument('title',
+            help='Title for the blog post to be generated')
+    post_parser.set_defaults(func=create_new_post)
+
+    generate_parser = subparser.add_parser('generate',
+            help='Generate the complete static site using the posts\
+                    in the \'content\' directory')
+    generate_parser.set_defaults(func=generate_site)
+
+    serve_parser = subparser.add_parser('serve',
+            help='Start an HTTP server that serves the files under the \
+                    <content-dir> directory')
+    serve_parser.add_argument('port', default=8080,
+            help='Port for HTTP server to listen to')
+    serve_parser.add_argument('host', action='store', default='localhost',
+            help='Host for HTTP server to serve on')
+    serve_parser.add_argument('path', action='store', default=os.getcwd(),
+            help='Root path to serve files from')
+    serve_parser.set_defaults(func=serve)
+
+    arguments = argument_parser.parse_args()
+
+    argument_dict = vars(arguments)
+    arguments.func(argument_dict)
+    print ('Complete')
 
 
 if __name__ == '__main__':
