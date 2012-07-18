@@ -45,8 +45,4 @@ remembered how to do a nested list in Markdown.
 * **Git(hub)/Dropbox Integration**- Automatically deploy new posts and changes to your blog on the back of commits
 to your local git repository, commit to Github, or Dropbox file uploads
 
-* **The Blug Server**- Ultimately, the purpose of Blug is to run as a standalone process capable of 'psuedo-dynamic' site
-interaction. A blog is traditionally a static thing. I envision Blug as an intelligent agent, able to dynamically regenerate
-the site when triggered by external events. Stuff like dynamically re-generating a page with a link
-to a discussion about your post being held on HackerNews or reddit. Or re-generating to scale back the included css/javascript 
-when Blug sees your webserver is getting hammered. These are the kinds of things I'm interested in exploring.
+* **The Blug Server**- The real reason I created Blug. Stay tuned.
