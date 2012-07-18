@@ -1,17 +1,39 @@
-github_user: jeffknupp
-clicky_id: 66535137
-disqus_shortname: jeffknupp
-facebook_appid: 212934732101925
-twitter_user: jeffknupp
-google_analytics_id: UA-12615441-1
-feed_url: http://feeds.feedburner.com/hackersgonnahack
-domain: jeffknupp.com
-url: http://www.jeffknupp.com
-blog_root: #~a823222
+# blog's root domain, e.g. foo.com
+domain: 
+# Full url to your blog, e.g. http://www.foo.com/blog
+url: 
+
+
+# The following two variables are described in this example: Imagine you're setting up
+# the blog of the marketing department of WidgetFactory. You'd like to serve it at
+# www.widgetfactory.com/marketing/blog/. In this case, 'blog_root' would be 'marketing'
+# and 'blog_prefix' would be 'blog'
+
+# The path from the root domain to your blog
+blog_root: 
+# Where under the blog_root your blog should live
 blog_prefix: blog
-title: Hackers Gonna Hack
-tag_line: On Hacking and Hustling
-author: Jeff Knupp
+
+# Title of your blog
+title: 
+# Displayed below the masthead
+tag_line: 
+
+# Your name
+author: 
+
+# Defaults for the directories files are read from and deployed to
 output_dir: generated
 content_dir: content
 template_dir: templates
+
+# full URL for your feedburner feed 
+feed_url:
+
+# The rest of these should be self explanitory
+github_user: 
+clicky_id: 
+disqus_shortname: 
+facebook_appid: 
+twitter_user: 
+google_analytics_id: 
