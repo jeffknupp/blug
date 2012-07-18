@@ -28,6 +28,7 @@ date: {date}
 
 
 def generate_post_filepath(title, date):
+    """Return the path a post should use based on its title and date"""
     post_file_date = datetime.datetime.strftime(date, '%Y/%m/%d/')
     title = ''.join(char for char in title.lower() if (
         char.isalnum() or char == ' '))
@@ -53,10 +54,11 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
-        post['relative_path'] = os.path.join(blog_prefix, generate_post_filepath(
-                post['title'], post['date']))
+        post['relative_path'] = os.path.join(blog_prefix,
+                generate_post_filepath(post['title'], post['date']))
 
-        post['relative_url'] = os.path.join('/', blog_root, post['relative_path'])
+        post['relative_url'] = os.path.join('/', blog_root,
+                post['relative_path'])
         post['canonical_url'] = canonical_url + post['relative_url']
 
         all_posts.append(post)
@@ -64,6 +66,8 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
 
 
 def create_path_to_file(path):
+    """Given a path, make sure all intermediate directories exiss and
+    create them if they don't"""
     directory = os.path.dirname(path)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -71,7 +75,8 @@ def create_path_to_file(path):
 
 def generate_post(post, template_variables):
     """Generate a single post's HTML file"""
-    output_path = os.path.join(template_variables['output_dir'], post['relative_path'], 'index.html')
+    output_path = os.path.join(template_variables['output_dir'],
+            post['relative_path'], 'index.html')
 
     if not post['body']:
         raise EnvironmentError('No content for post [{post}] found.'.format(
@@ -86,8 +91,8 @@ def generate_post(post, template_variables):
     open(output_path, 'w').write(final_html)
 
 
-
-def generate_static_page(template_variables, output_dir, template_name='index.html'):
+def generate_static_page(template_variables, output_dir,
+        template_name='index.html'):
     """Generate static pages"""
     template = template_variables['env'].get_template(template_name)
     resulting_html = template.render(template_variables)
@@ -101,22 +106,31 @@ def generate_static_page(template_variables, output_dir, template_name='index.ht
 def generate_files(template_variables):
     """Generate all HTML files from the template directory using the sitewide
     configuration"""
-    all_posts = get_all_posts(template_variables['content_dir'], template_variables['blog_prefix'], template_variables['url'],
-        template_variables['blog_root'])
+    all_posts = get_all_posts(template_variables['content_dir'],
+            template_variables['blog_prefix'], template_variables['url'],
+            template_variables['blog_root'])
     all_posts.sort(key=lambda i: i['date'], reverse=True)
     template_variables['recent_posts'] = all_posts[:5]
     template_variables['all_posts'] = all_posts
     template_variables['env'] = jinja2.Environment(
             loader=jinja2.FileSystemLoader(template_variables['template_dir']))
-    generate_static_page(template_variables, template_variables['output_dir'], 'index.html')
-    generate_static_page(template_variables, template_variables['blog_dir'], 'index.html')
-    generate_static_page(template_variables, os.path.join(template_variables['blog_dir'], 'archives'), 'archives.html')
-    generate_static_page(template_variables, os.path.join(template_variables['output_dir'], 'about-me'), 'about.html')
+    generate_static_page(template_variables,
+            template_variables['output_dir'], 'index.html')
+    generate_static_page(template_variables,
+            template_variables['blog_dir'], 'index.html')
+    generate_static_page(template_variables,
+            os.path.join(template_variables['blog_dir'],
+                'archives'), 'archives.html')
+    generate_static_page(template_variables,
+            os.path.join(template_variables['output_dir'],
+                'about-me'), 'about.html')
     current_page = 1
-    for page in [all_posts[index:index+5] for index in range (5, len(all_posts), 5)]:
+    for page in [all_posts[index:index + 5] for index in range(
+        5, len(all_posts), 5)]:
         current_page += 1
         template_variables['all_posts'] = page
-        output_dir = os.path.join(template_variables['blog_dir'], 'page', str(current_page))
+        output_dir = os.path.join(template_variables['blog_dir'],
+                'page', str(current_page))
         generate_static_page(template_variables, output_dir, 'index.html')
 
     for index, post in enumerate(all_posts):
@@ -148,9 +162,12 @@ def copy_static_content(output_dir, root_dir):
         print ('Removing old content...')
     shutil.copytree(os.path.join(root_dir, 'static'), output_dir)
 
-if __name__ == '__main__':
+
+def main():
+    """Main execution of blug"""
     argument_parser = argparse.ArgumentParser(
-            description='Generate a static HTML blog from Markdown blog entries')
+            description='Generate a static HTML blog from \
+                    Markdown blog entries')
     command_group = argument_parser.add_mutually_exclusive_group()
     command_group.add_argument('-p, --post', action='store',
             dest='post_title', help='Create a new post with the \
@@ -178,3 +195,7 @@ if __name__ == '__main__':
         copy_static_content(site_config['output_dir'], site_config['root_dir'])
         generate_files(site_config)
     print ('Complete')
+
+
+if __name__ == '__main__':
+    main()
