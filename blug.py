@@ -23,7 +23,7 @@ def generate_post_filepath(title, date):
     return post_file_date + title.replace(' ', '-')
 
 
-def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
+def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
     """Return a list of dictionaries representing converted posts"""
     input_files = os.listdir(content_dir)
     all_posts = list()
@@ -62,7 +62,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
             post['relative_path'] = os.path.join(
                     blog_prefix, post['relative_path'])
 
-        post['relative_url'] = post['relative_path']
+        post['relative_url'] = '/' + post['relative_path']
         if blog_root:
             post['relative_url'] = os.path.join(
                     '/', blog_root, post['relative_url'])
@@ -76,9 +76,12 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root):
 def create_path_to_file(path):
     """Given a path, make sure all intermediate directories exist; create
     them if they don't"""
-    directory = os.path.dirname(path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    if not os.path.splitext(path)[1]:
+        path += '/'
+    else:
+        path = os.path.dirname(path)
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 
 def generate_post(post, template_variables):
@@ -193,13 +196,13 @@ def serve(arguments):
     import http.server
     import socketserver
 
-    os.chdir((arguments['path']))
+    os.chdir(arguments['path'])
     handler = http.server.SimpleHTTPRequestHandler
 
     httpd = socketserver.TCPServer((arguments['host'], int(arguments['port'])),
             handler)
 
-    print("serving at port", arguments['port'])
+    print("serving from {path} on port {port}".format(path=arguments['path'], port=arguments['port']))
     httpd.serve_forever()
 
 
@@ -217,11 +220,13 @@ def generate_site(arguments):
     with open('config.yml', 'r') as config_file:
         site_config = yaml.load(config_file.read())
 
-    site_config['root_dir'] = os.getcwd()
-    site_config['blog_dir'] = os.path.join(site_config['output_dir'],
-        site_config['blog_prefix'])
+    site_config['blog_dir'] = site_config['output_dir']
+    if 'blog_prefix' in site_config:
+        site_config['blog_dir'] = os.path.join(site_config['output_dir'],
+            site_config['blog_prefix'])
     print ('Generating...')
-    copy_static_content(site_config['output_dir'], site_config['root_dir'])
+
+    copy_static_content(site_config['output_dir'], os.getcwd())
     generate_all_files(site_config)
 
 
