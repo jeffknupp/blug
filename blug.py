@@ -141,6 +141,8 @@ def generate_static_files(site_config):
         site_config['all_posts'] = posts
         generate_static_page(site_config, os.path.join(site_config['blog_dir'],
             'categories', category), 'archives.html')
+        generate_static_page(site_config, os.path.join(site_config['blog_dir'],
+            'categories', category), 'atom.xml', 'atom.xml')
 
 
 def generate_pagination_pages(site_config):
@@ -168,10 +170,7 @@ def generate_all_files(site_config):
     categories = collections.defaultdict(list)
     for post in all_posts:
         for category in post['categories']:
-            category_post_data = dict()
-            for attribute in ['title', 'relative_url', 'date', 'categories']:
-                category_post_data[attribute] = post[attribute]
-            categories[category].append(category_post_data)
+            categories[category].append(post)
 
     site_config['now'] = datetime.datetime.now().isoformat()
     site_config['recent_posts'] = all_posts[:5]
