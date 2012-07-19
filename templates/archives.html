@@ -18,17 +18,17 @@
 <article>
   
 <h1><a href="{{ post.relative_url }}">{{ post.title }}</a></h1>
-<time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime('%Y-%m-%d %I:%M') }}</time>
+<time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime('%b %d') }}</time>
 <footer>
+    <span class="categories">posted in 
     {% for category in post.categories %}
-    <a class='category' href='/blog/categories/{{ category }}/'>{{ category }}</a>,
+    <a class='category' href='/blog/categories/{{ category }}/'>{{ category }}</a></span>,
     {% endfor %}
+    </span>
 </footer>
 
 </article>
 {% endfor %}
-</div>
-</div>
 </div>
 </div>
 {% endblock %}

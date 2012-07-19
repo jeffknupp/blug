@@ -8,10 +8,12 @@ import yaml
 import datetime
 import shutil
 import argparse
+import collections
 
 POST_SKELETON = """
 title: "{title}"
 date: {date}
+categories:
 ---
 """
 
@@ -44,6 +46,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         post['body'] = markdown.markdown(post_body, ['fenced_code'])
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
+        post['categories'] = post['categories'].split()
 
         # Construct datetime from the *incredibly useful* string YAML
         # provides
@@ -130,6 +133,10 @@ def generate_static_files(site_config):
     generate_static_page(site_config,
             os.path.join(site_config['output_dir'],
                 'about-me'), 'about.html')
+    for category, posts in site_config['categories'].items():
+        site_config['all_posts'] = posts
+        generate_static_page(site_config, os.path.join(site_config['blog_dir'],
+            'categories', category), 'archives.html')
 
 
 def generate_pagination_pages(site_config):
@@ -154,9 +161,17 @@ def generate_all_files(site_config):
             site_config['blog_prefix'], site_config['url'],
             site_config['blog_root'])
     all_posts.sort(key=lambda i: i['date'], reverse=True)
+    categories = collections.defaultdict(list)
+    for post in all_posts:
+        for category in post['categories']:
+            category_post_data = dict()
+            for attribute in ['title', 'relative_url', 'date', 'categories']:
+                category_post_data[attribute] = post[attribute]
+            categories[category].append(category_post_data)
 
     site_config['recent_posts'] = all_posts[:5]
     site_config['all_posts'] = all_posts
+    site_config['categories'] = categories
     site_config['env'] = jinja2.Environment(
             loader=jinja2.FileSystemLoader(site_config['template_dir']))
 
@@ -204,7 +219,8 @@ def serve(arguments):
     httpd = socketserver.TCPServer((arguments['host'], int(arguments['port'])),
             handler)
 
-    print("serving from {path} on port {port}".format(path=arguments['root'], port=arguments['port']))
+    print("serving from {path} on port {port}".format(path=arguments['root'],
+        port=arguments['port']))
     httpd.serve_forever()
 
 

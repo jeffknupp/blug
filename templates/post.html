@@ -17,7 +17,7 @@
     <span class="byline author vcard">Posted by <span class="fn">{{ author }}</span></span>
     <time datetime="{{ post.date }}" pubdate data-updated="true">{{ post.date.strftime(' %Y-%m-%d %I:%M ') }}</time>
 <span class="categories">
-    {% for category in categories %}
+    {% for category in post.categories %}
     <a class='category' href='/blog/categories/{{ category }}/'>{{ category }}</a>,
     {% endfor %}
 </span>
