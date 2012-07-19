@@ -43,7 +43,8 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         # Generate HTML from Markdown, splitting between the teaser (the
         # content to display on the front page until <!--more--> is reached)
         # and the post proper
-        post['body'] = markdown.markdown(post_body, ['fenced_code'])
+        post['body'] = markdown.markdown(post_body, ['fenced_code',
+            'codehilite(force_linenos=True)'])
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
         post['categories'] = post['categories'].split()
@@ -110,11 +111,12 @@ def generate_post(post, template_variables):
         output.write(template.render(template_variables))
 
 
-def generate_static_page(template_variables, output_dir, template_name):
+def generate_static_page(template_variables, output_dir, template_name,
+        filename='index.html'):
     """Generate a static page"""
     template = template_variables['env'].get_template(template_name)
     create_path_to_file(output_dir)
-    with open(os.path.join(output_dir, 'index.html'), 'w') as output_file:
+    with open(os.path.join(output_dir, filename), 'w') as output_file:
         output_file.write(template.render(template_variables))
 
 
@@ -133,6 +135,8 @@ def generate_static_files(site_config):
     generate_static_page(site_config,
             os.path.join(site_config['output_dir'],
                 'about-me'), 'about.html')
+    generate_static_page(site_config, site_config['output_dir'],
+                'atom.xml', 'atom.xml')
     for category, posts in site_config['categories'].items():
         site_config['all_posts'] = posts
         generate_static_page(site_config, os.path.join(site_config['blog_dir'],
@@ -169,6 +173,7 @@ def generate_all_files(site_config):
                 category_post_data[attribute] = post[attribute]
             categories[category].append(category_post_data)
 
+    site_config['now'] = datetime.datetime.now().isoformat()
     site_config['recent_posts'] = all_posts[:5]
     site_config['all_posts'] = all_posts
     site_config['categories'] = categories

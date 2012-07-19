@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+    <title><![CDATA[{{ title }}]]></title>
+    <link href="{{ url }}/atom.xml" rel="self"/>
+    <link href="{{ url }}"/>
+    <updated>{{ now }}</updated>
+    <id>{{ url }}</id>
+  <author>
+      <name><![CDATA[{{ author }}]]></name>
+    
+  </author>
+  <generator uri="http://www.github.com/jeffknupp/blug/">Blug</generator>
+
+  
+  {% for post in all_posts %}
+  <entry>
+      <title type="html"><![CDATA[{{ post.title }}]]></title>
+      <link href="{{ post.canonical_url }}"/>
+      <updated>{{ post.date.isoformat() }}</updated>
+      <id>{{ post.canonical_url }}</id>
+      <content type="html"><![CDATA[{{ post.body }}
+]]></content>
+  </entry>
+  {% endfor %}
+</feed>
