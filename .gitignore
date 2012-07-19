@@ -33,3 +33,7 @@ pip-log.txt
 *live.html
 # Test config file
 config.local.yml
+
+# Local files
+content
+MANIFEST.in
