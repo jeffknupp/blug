@@ -1,3 +1,4 @@
+#! /usr/bin/evn python
 """Static blog generator"""
 
 import jinja2

@@ -1,9 +1,19 @@
 from distutils.core import setup
+import distutils.command.install_scripts
+import shutil
+
+class ScriptInstaller (distutils.command.install_scripts.install_scripts):
+    def run(self):
+        distutils.command.install_scripts.install_scripts.run(self)
+        for script in self.get_outputs():
+            if script.endswith(".py"):
+                shutil.move(script, script[:-3])
 
 setup(
     name = 'blug',
     scripts = ['blug.py'],
     version = '0.1.0',
+    cmdclass = {"install_scripts": ScriptInstaller },
     description = 'Static site generator for Markdown based blogs, with a built-in webserver',
     author = 'Jeff Knupp',
     author_email = 'jknupp@gmail.com',
