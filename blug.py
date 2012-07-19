@@ -196,20 +196,21 @@ def serve(arguments):
     import http.server
     import socketserver
 
-    os.chdir(arguments['path'])
+    if 'root' in arguments:
+        os.chdir(arguments['root'])
     handler = http.server.SimpleHTTPRequestHandler
 
     httpd = socketserver.TCPServer((arguments['host'], int(arguments['port'])),
             handler)
 
-    print("serving from {path} on port {port}".format(path=arguments['path'], port=arguments['port']))
+    print("serving from {path} on port {port}".format(path=arguments['root'], port=arguments['port']))
     httpd.serve_forever()
 
 
 def create_new_post(arguments):
     """pass"""
     site_config = dict()
-    with open('config.yml', 'r') as config_file:
+    with open('config.local.yml', 'r') as config_file:
         site_config = yaml.load(config_file.read())
     create_post(arguments['title'], site_config['content_dir'])
 
@@ -217,7 +218,7 @@ def create_new_post(arguments):
 def generate_site(arguments):
     """pass"""
     site_config = dict()
-    with open('config.yml', 'r') as config_file:
+    with open('config.local.yml', 'r') as config_file:
         site_config = yaml.load(config_file.read())
 
     site_config['blog_dir'] = site_config['output_dir']
@@ -233,28 +234,34 @@ def generate_site(arguments):
 def main():
     """Main execution of blug"""
     argument_parser = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             description='Generate a static HTML blog from \
                     Markdown blog entries')
     subparser = argument_parser.add_subparsers(help='help for sub-commands')
 
-    post_parser = subparser.add_parser('post', help='Create a blank blog post')
+    post_parser = subparser.add_parser('post', help='Create a blank blog post',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     post_parser.add_argument('title',
             help='Title for the blog post to be generated')
     post_parser.set_defaults(func=create_new_post)
 
     generate_parser = subparser.add_parser('generate',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             help='Generate the complete static site using the posts\
                     in the \'content\' directory')
     generate_parser.set_defaults(func=generate_site)
 
     serve_parser = subparser.add_parser('serve',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
             help='Start an HTTP server that serves the files under the \
                     <content-dir> directory')
-    serve_parser.add_argument('port', default=8080,
+    serve_parser.add_argument('-p', '--port', default=8080,
             help='Port for HTTP server to listen to')
-    serve_parser.add_argument('host', action='store', default='localhost',
-            help='Host for HTTP server to serve on')
-    serve_parser.add_argument('path', action='store', default=os.getcwd(),
+    serve_parser.add_argument('-s', '--host', action='store',
+            default='localhost',
+            help='Hostname for HTTP server to serve on')
+    serve_parser.add_argument('-r', '--root', action='store',
+            default=os.path.join(os.getcwd(), 'generated'),
             help='Root path to serve files from')
     serve_parser.set_defaults(func=serve)
 

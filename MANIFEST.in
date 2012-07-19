@@ -1,0 +1,3 @@
+recursive-include static *
+recursive-include templates *
+include README.md

@@ -31,3 +31,5 @@ pip-log.txt
 .mr.developer.cfg
 
 *live.html
+# Test config file
+config.local.yml
