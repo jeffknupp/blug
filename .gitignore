@@ -36,4 +36,4 @@ config.local.yml
 
 # Local files
 content
-MANIFEST.in
+MANIFEST*
