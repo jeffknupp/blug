@@ -9,6 +9,7 @@ import datetime
 import shutil
 import argparse
 import collections
+import webbrowser
 
 POST_SKELETON = """
 title: "{title}"
@@ -218,20 +219,34 @@ def serve(arguments):
 
     if 'root' in arguments:
         os.chdir(arguments['root'])
-    handler = http.server.SimpleHTTPRequestHandler
+    class PostHandler(http.server.SimpleHTTPRequestHandler):
+        def do_POST(self):
+            print (self.headers, self.rfile.read())
+    handler = PostHandler
 
     httpd = socketserver.TCPServer((arguments['host'], int(arguments['port'])),
             handler)
 
     print("serving from {path} on port {port}".format(path=arguments['root'],
         port=arguments['port']))
+    webbrowser.open('http://{host}:{port}'.format(host=arguments['host'],
+        port=arguments['port']))
     httpd.serve_forever()
+
+
+def get_config_filename():
+    if os.path.exists('config.local.yml'):
+        return 'config.local.yml'
+    elif os.path.exists('config.yml'):
+        return 'config.yml'
+    else:
+        return None
 
 
 def create_new_post(arguments):
     """pass"""
     site_config = dict()
-    with open('config.local.yml', 'r') as config_file:
+    with open(get_config_filename(), 'r') as config_file:
         site_config = yaml.load(config_file.read())
     create_post(arguments['title'], site_config['content_dir'])
 
@@ -239,7 +254,7 @@ def create_new_post(arguments):
 def generate_site(arguments):
     """pass"""
     site_config = dict()
-    with open('config.local.yml', 'r') as config_file:
+    with open(get_config_filename(), 'r') as config_file:
         site_config = yaml.load(config_file.read())
 
     site_config['blog_dir'] = site_config['output_dir']

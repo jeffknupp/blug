@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}{{ title }}{% endblock %}</title>
+  <meta name="author" content="{% block author %}{{ author }}{% endblock %}">
+
+  
+  <meta name="description" content="{% block description %}{{ description }}{% endblock %} &hellip;"> 
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="canonical" href="{% block canonical_url %}{{ url }}{% endblock %}">
+  <link href="/static/favicon.png" rel="icon">
+  <link href="/static/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/static/stylesheets/demo.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="/static/javascripts/Markdown.Converter.js"></script>
+  <script type="text/javascript" src="/static/javascripts/Markdown.Sanitizer.js"></script>
+  <script type="text/javascript" src="/static/javascripts/Markdown.Editor.js"></script>
+  <script type="text/javascript" src="/static/javascripts/jquery.js"></script>
+  <script src="/static/javascripts/modernizr-2.0.js"></script>
+  <script src="/static/javascripts/ender.js"></script>
+  <script src="/static/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+</head>
+
+<body   >
+
+  <header role="banner"><hgroup>
+  <h1><a href="/">{{ title }}</a></h1>
+  
+  <h2>{{ tag_line }}</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+      <li><a href="/" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+      <input type="hidden" name="q" value="/" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/archives">Archives</a></li>
+  <li><a href="/about-me/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  <header>
+  <h1 class="entry-title"></h1>
+      <p class="meta">
+      <time datetime="" pubdate data-updated="true"></time>
+      </p>
+  </header>
+  <div class="entry-content" >
+        <section id="wmd-preview-second" ></section>
+        <div class="wmd-panel">
+            <div id="wmd-button-bar-second"></div>
+            <textarea class="wmd-input" id="wmd-input-second"> </textarea> </div>
+        <script type="text/javascript">
+            (function () {
+                var converter2 = new Markdown.Converter();
+
+                converter2.hooks.chain("preConversion", function (text) {
+                    return text.replace(/\b(a\w*)/gi, "*$1*");
+                });
+
+                converter2.hooks.chain("plainLinkText", function (url) {
+                    return "This is a link to " + url.replace(/^https?:\/\//, "");
+                });
+                
+                var help = function () { alert("Do you need help?"); }
+                
+                var editor2 = new Markdown.Editor(converter2, "-second", { handler: help });
+                
+                editor2.run();
+                })();
+            var postit = function() {
+jQuery.post( $("#wmd-input-second.wmdinput").text());
+                }
+        </script>
+        <button onclick="postit()">Create Post</button>
+
+</div>
+
+  <footer>
+    <p class="meta">
+    <span class="byline author vcard">Posted by <span class="fn">You!</span></span>
+    <time datetime="" pubdate data-updated="true"></time>
+</article>
+<section>
+  </div>  
+<aside class="sidebar">
+  
+
+<section>
+<h1>Powered by <a href="http://www.github.com/jeffknupp/blug">Blug</a></h1>
+</section>
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+      <a href="/">Old Post 1</a>
+      </li>
+      <li class="post">
+      <a href="/">Old Post 2</a>
+      </li>
+      <li class="post">
+      <a href="/">Old Post 3</a>
+      </li>
+  </ul>
+</section>
+<section>
+  <h1>Github Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="/">@you</a> on Github
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <a href="/" class="twitter-follow-button" data-show-count="false">Follow @you</a>
+</section>
+</aside>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - You -
+  <span class="credit">Powered by <a href="http://www.github.com/jeffknupp/blug">Blug</a></span>
+</p>
+
+</body>
+</html>
