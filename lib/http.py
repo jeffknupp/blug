@@ -4,7 +4,7 @@ import os
 import os.path
 import resource
 
-RUSAGE = """0	{ru_utime}	time in user mode (float)
+RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
 {}	maximum resident set size
 {}	shared memory size
@@ -44,9 +44,9 @@ class FileCache():
                     self.cache[name] = input_file.read()
 
         if self._debug >= 1:
-            self.get_cache_stats()
+            self._get_cache_stats()
 
-    def get_cache_stats(self):
+    def _get_cache_stats(self):
         """Returns statistics of the current cache"""
         stat_list = list()
         for filename, file_buffer in self.cache.items():
@@ -58,7 +58,7 @@ class FileCache():
         return stat_list
 
     def __str__(self):
-        return '\n'.join(self.get_cache_stats())
+        return '\n'.join(self._get_cache_stats())
 
 
 def print_usage_stats(rusage_struct):
