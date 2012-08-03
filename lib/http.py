@@ -3,6 +3,7 @@
 import os
 import os.path
 import resource
+import select
 
 RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
@@ -20,6 +21,100 @@ RUSAGE = """0	{}	time in user mode (float)
 {}	signals received
 {}	voluntary context switches
 {}	involuntary context switches"""
+
+EOL1 = '\r\n'
+EOL2 = '\n\n'
+
+"""
+serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+serversocket.bind(('0.0.0.0', 8080))
+serversocket.listen(1)
+serversocket.setblocking(0)
+
+epoll = select.epoll()
+epoll.register(serversocket.fileno(), select.EPOLLIN)
+
+try:
+   connections = {}; requests = {}; responses = {}
+   while True:
+      events = epoll.poll(1)
+      for fileno, event in events:
+         if fileno == serversocket.fileno():
+            connection, address = serversocket.accept()
+            connection.setblocking(0)
+            epoll.register(connection.fileno(), select.EPOLLIN)
+            connections[connection.fileno()] = connection
+            requests[connection.fileno()] = b''
+            responses[connection.fileno()] = response
+         elif event & select.EPOLLIN:
+            requests[fileno] += connections[fileno].recv(1024)
+            if EOL1 in requests[fileno] or EOL2 in requests[fileno]:
+               epoll.modify(fileno, select.EPOLLOUT)
+               print('-'*40 + '\n' + requests[fileno].decode()[:-2])
+         elif event & select.EPOLLOUT:
+            byteswritten = connections[fileno].send(responses[fileno])
+            responses[fileno] = responses[fileno][byteswritten:]
+            if len(responses[fileno]) == 0:
+               epoll.modify(fileno, 0)
+               connections[fileno].shutdown(socket.SHUT_RDWR)
+         elif event & select.EPOLLHUP:
+            epoll.unregister(fileno)
+            connections[fileno].close()
+            del connections[fileno]
+finally:
+   epoll.unregister(serversocket.fileno())
+   epoll.close()
+   serversocket.close()
+"""
+
+
+class EPollMixin:
+    """Mixin for socketserver.BaseServer to use epoll instead of select"""
+
+    def __init__(self):
+        """Constructor. Add lists of sockets for epoll"""
+        self.connections = dict()
+        self.requests = dict()
+        self.responses = dict()
+
+    def server_activate(self):
+        """Increase the request_queue_size and set non-blocking"""
+        self.socket.listen(75)
+        self.socket.setblocking(0)
+        select.epoll.register(self, select.EPOLLIN)
+
+    def handle_request(self):
+        """Handle one request, possibly blocking. Does NOT respect timeout.
+
+        To avoid the overhead of select with many client connections,
+        use epoll (and later do the same for kqpoll)"""
+        events = select.epoll.poll()
+        for fd, event in events:
+            if fd == self.fileno():
+                connection, address = self.socket.accept()
+                connection.setblocking(0)
+                select.poll.epoll.register(self.fileno(), select.EPOLLIN)
+                self.connections[self.fileno()] = connection
+            elif event & select.EPOLLIN:
+                self.requests[fd] += self.connections[fd].recv(1024)
+                if EOL1 in self.requests[fd] or EOL2 in self.requests[fd]:
+                    select.poll.epoll.modify(fd, select.EPOLLOUT)
+                print('-' * 40 + '\n' + self.requests[fd].decode()[:-2])
+            elif event & select.EPOLLOUT:
+                byteswritten = self.connections[fd].send(self.responses[fd])
+                self.responses[fd] = self.responses[fd][byteswritten:]
+                if len(self.responses[fd]) == 0:
+                    select.poll.epoll.modify(fd, 0)
+                    self.connections[fd].shutdown(self.socket.SHUT_RDWR)
+            elif event & select.EPOLLHUP:
+                select.poll.epoll.unregister(fd)
+                self.connections[fd].close()
+                del self.connections[fd]
+
+
+#class ThreadPoolMixin:
+#    def __init__(self, num_threads=4):
 
 
 class FileCache():
