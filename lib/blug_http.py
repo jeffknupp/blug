@@ -4,6 +4,9 @@ import os
 import os.path
 import resource
 import select
+import socketserver
+import socket
+from http import server
 
 RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
@@ -72,17 +75,15 @@ finally:
 class EPollMixin:
     """Mixin for socketserver.BaseServer to use epoll instead of select"""
 
-    def __init__(self):
-        """Constructor. Add lists of sockets for epoll"""
+    def server_activate(self):
+        """Increase the request_queue_size and set non-blocking"""
         self.connections = dict()
         self.requests = dict()
         self.responses = dict()
-
-    def server_activate(self):
-        """Increase the request_queue_size and set non-blocking"""
         self.socket.listen(75)
         self.socket.setblocking(0)
-        select.epoll.register(self, select.EPOLLIN)
+        self.epoll = select.epoll()
+        self.epoll.register(self.fileno(), select.EPOLLIN)
 
     def handle_request(self):
         """Handle one request, possibly blocking. Does NOT respect timeout.
@@ -94,27 +95,44 @@ class EPollMixin:
             if fd == self.fileno():
                 connection, address = self.socket.accept()
                 connection.setblocking(0)
-                select.poll.epoll.register(self.fileno(), select.EPOLLIN)
+                self.epoll.register(self.fileno(), select.EPOLLIN)
                 self.connections[self.fileno()] = connection
             elif event & select.EPOLLIN:
                 self.requests[fd] += self.connections[fd].recv(1024)
                 if EOL1 in self.requests[fd] or EOL2 in self.requests[fd]:
-                    select.poll.epoll.modify(fd, select.EPOLLOUT)
+                    self.epoll.modify(fd, select.EPOLLOUT)
                 print('-' * 40 + '\n' + self.requests[fd].decode()[:-2])
             elif event & select.EPOLLOUT:
                 byteswritten = self.connections[fd].send(self.responses[fd])
                 self.responses[fd] = self.responses[fd][byteswritten:]
                 if len(self.responses[fd]) == 0:
-                    select.poll.epoll.modify(fd, 0)
+                    self.epoll.modify(fd, 0)
                     self.connections[fd].shutdown(self.socket.SHUT_RDWR)
             elif event & select.EPOLLHUP:
-                select.poll.epoll.unregister(fd)
+                self.epoll.unregister(fd)
                 self.connections[fd].close()
                 del self.connections[fd]
 
 
-#class ThreadPoolMixin:
-#    def __init__(self, num_threads=4):
+class EPollTCPServer(EPollMixin, socketserver.TCPServer):
+    pass
+
+
+class BlugHttpServer(EPollTCPServer):
+    """epoll based http server"""
+    def server_bind(self):
+        """Override server_bind to store the server name."""
+        socketserver.TCPServer.server_bind(self)
+        host, port = self.socket.getsockname()[:2]
+        self.server_name = socket.getfqdn(host)
+        self.server_port = port
+
+
+def start_server(host='localhost', port=8000,
+        handler_class=server.SimpleHTTPRequestHandler):
+    address = (host, port)
+    http_server = BlugHttpServer(address, handler_class)
+    http_server.serve_forever()
 
 
 class FileCache():
@@ -166,7 +184,8 @@ def print_usage_stats(rusage_struct):
     rusage_struct.ru_nivcsw)
 
 if __name__ == '__main__':
-    cache = FileCache('/home/jeff/code/blug/generated/', 1)
-    print (cache)
-    usage = resource.getrusage(resource.RUSAGE_SELF)
-    print (print_usage_stats(usage))
+    start_server()
+    #cache = FileCache('/home/jeff/code/blug/generated/', 1)
+    #print (cache)
+    #usage = resource.getrusage(resource.RUSAGE_SELF)
+    #print (print_usage_stats(usage))

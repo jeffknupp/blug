@@ -9,6 +9,7 @@ import datetime
 import shutil
 import argparse
 import collections
+import lib.blug_http
 
 POST_SKELETON = """
 title: "{title}"
@@ -220,7 +221,7 @@ def serve(arguments):
         os.chdir(arguments['root'])
     handler = http.server.SimpleHTTPRequestHandler
 
-    httpd = socketserver.TCPServer((arguments['host'], int(arguments['port'])),
+    httpd = lib.blug_http.BlugHttpServer((arguments['host'], int(arguments['port'])),
             handler)
 
     print("serving from {path} on port {port}".format(path=arguments['root'],
