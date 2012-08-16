@@ -231,16 +231,22 @@ def serve(arguments):
 def create_new_post(arguments):
     """pass"""
     site_config = dict()
-    with open('config.local.yml', 'r') as config_file:
-        site_config = yaml.load(config_file.read())
+    config_file = 'config.yml'
+    if os.path.exists('config.local.yml'):
+        config_file = 'config.local.yml'
+    with open(config_file, 'r') as config_file_handle:
+        site_config = yaml.load(config_file_handle.read())
     create_post(arguments['title'], site_config['content_dir'])
 
 
 def generate_site(arguments):
     """pass"""
     site_config = dict()
-    with open('config.local.yml', 'r') as config_file:
-        site_config = yaml.load(config_file.read())
+    config_file = 'config.yml'
+    if os.path.exists('config.local.yml'):
+        config_file = 'config.local.yml'
+    with open(config_file, 'r') as config_file_handle:
+        site_config = yaml.load(config_file_handle.read())
 
     site_config['blog_dir'] = site_config['output_dir']
     if 'blog_prefix' in site_config:
