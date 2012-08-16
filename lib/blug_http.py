@@ -41,7 +41,7 @@ class EPollMixin:
         self.responses = dict()
         self.addresses = dict()
         self.socket.listen(75)
-        self.socket.setblocking(0)
+        self.socket.settimeout(0.0)
         self.epoll = select.epoll()
         self.epoll.register(self.fileno(), select.EPOLLIN)
 
@@ -122,6 +122,7 @@ class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHand
 
         file_buffer = self.server.file_cache.get_resource(self.path)
 
+        #TODO: Cache header along with file and send directly
         self.send_response(200)
         self.send_header("Content-type", cType)
         self.send_header("Content-Length", len(file_buffer))
