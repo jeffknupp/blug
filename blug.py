@@ -224,8 +224,17 @@ def serve(arguments):
 
     print("serving from {path} on port {port}".format(path=arguments['root'],
         port=arguments['port']))
+
+    #import cProfile
+    #cProfile.runctx('run_server(httpd)', locals(), globals(), 'output')
     while True:
         httpd.handle_request()
+
+
+def run_server(httpd):
+    for x in range(10000):
+        httpd.handle_request()
+
 
 
 def create_new_post(arguments):

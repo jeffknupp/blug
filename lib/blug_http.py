@@ -8,6 +8,7 @@ import select
 import socketserver
 import socket
 from http import server
+import datetime
 
 RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
@@ -60,11 +61,11 @@ class EPollMixin:
                 connection.setblocking(0)
                 self.epoll.register(connection.fileno(), select.EPOLLIN)
                 self.connections[connection.fileno()] = connection
-                self.requests[connection.fileno()] = bytes()
+                self.requests[connection.fileno()] = bytearray(65536)
                 self.responses[connection.fileno()] = io.BytesIO()
                 self.addresses[connection.fileno()] = address
             elif event & select.EPOLLIN:
-                self.requests[fd] += self.connections[fd].recv(1024)
+                self.connections[fd].recv_into(self.requests[fd], 1024)
                 if EOL1 in self.requests[fd] or EOL2 in self.requests[fd]:
                     self.process_request(self.requests[fd], fd)
                     self.epoll.modify(fd, select.EPOLLOUT)
@@ -73,7 +74,7 @@ class EPollMixin:
                 self.responses[fd] = self.responses[fd].getbuffer()[byteswritten:]
                 if len(self.responses[fd]) == 0:
                     self.epoll.modify(fd, 0)
-                    self.connections[fd].shutdown(socket.SHUT_WR)
+                    self.connections[fd].close()
             elif event & select.EPOLLHUP:
                 self.epoll.unregister(fd)
                 self.connections[fd].close()
@@ -103,6 +104,8 @@ class EPollRequestHandlerMixin():
     def finish(self):
         self.rfile.close()
 
+    def log_request(self, code='-', size='-'):
+        pass
 
 
 class EPollTCPServer(EPollMixin, socketserver.TCPServer):
@@ -110,10 +113,30 @@ class EPollTCPServer(EPollMixin, socketserver.TCPServer):
 
 
 class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHandler):
-    pass
+
+    def do_GET(self):
+        cType = self.guess_type(self.path)
+        path = self.translate_path(self.path)
+        if self.path.endswith('/'):
+            self.path = os.path.join(path, 'index.html')
+
+        file_buffer = self.server.file_cache.get_resource(self.path)
+
+        self.send_response(200)
+        self.send_header("Content-type", cType)
+        self.send_header("Content-Length", len(file_buffer))
+        self.send_header("Last-Modified", self.date_time_string())
+        self.end_headers()
+        self.wfile.write(file_buffer)
 
 
 class BlugHttpServer(EPollTCPServer):
+
+    def __init__(self, *args, **kwargs):
+        self.file_cache = FileCache('/home/a823222/other/blug/generated/', 1)
+        print (self.file_cache)
+        EPollTCPServer.__init__(self, *args, **kwargs)
+
     """epoll based http server"""
     def server_bind(self):
         """Override server_bind to store the server name."""
@@ -148,11 +171,13 @@ class FileCache():
                 if os.path.isdir(name):
                     self.build_cache(name)
             else:
-                with open(name, 'r') as input_file:
-                    self.cache[name] = input_file.read()
+                with open(name, 'rb') as input_file:
+                    self.cache[name] = bytes(input_file.read())
 
-        if self._debug >= 1:
-            self._get_cache_stats()
+    def get_resource(self, path):
+        if path in self.cache:
+            return memoryview(self.cache[path])
+        return None
 
     def _get_cache_stats(self):
         """Returns statistics of the current cache"""
