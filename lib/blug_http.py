@@ -1,6 +1,7 @@
 """HTTP server and utilities"""
 
 import os
+import io
 import os.path
 import resource
 import select
@@ -25,8 +26,8 @@ RUSAGE = """0	{}	time in user mode (float)
 {}	voluntary context switches
 {}	involuntary context switches"""
 
-EOL1 = '\r\n'
-EOL2 = '\n\n'
+EOL1 = b'\r\n'
+EOL2 = b'\n\n'
 
 """
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -80,41 +81,88 @@ class EPollMixin:
         self.connections = dict()
         self.requests = dict()
         self.responses = dict()
+        self.addresses = dict()
         self.socket.listen(75)
         self.socket.setblocking(0)
         self.epoll = select.epoll()
         self.epoll.register(self.fileno(), select.EPOLLIN)
+
+    def finish_request(self, request, client_address):
+        """Finish one request by instantiating RequestHandlerClass."""
+        print ('finish_request')
+        self.RequestHandlerClass(request, client_address, self, client_address)
 
     def handle_request(self):
         """Handle one request, possibly blocking. Does NOT respect timeout.
 
         To avoid the overhead of select with many client connections,
         use epoll (and later do the same for kqpoll)"""
-        events = select.epoll.poll()
+        events = self.epoll.poll()
         for fd, event in events:
+            print ('events start')
             if fd == self.fileno():
                 connection, address = self.socket.accept()
                 connection.setblocking(0)
-                self.epoll.register(self.fileno(), select.EPOLLIN)
-                self.connections[self.fileno()] = connection
+                print ('accepting fd {}'.format(connection.fileno()))
+                self.epoll.register(connection.fileno(), select.EPOLLIN)
+                self.connections[connection.fileno()] = connection
+                self.requests[connection.fileno()] = bytes()
+                self.responses[connection.fileno()] = io.BytesIO()
+                self.addresses[connection.fileno()] = address
             elif event & select.EPOLLIN:
+                print ('data to read')
                 self.requests[fd] += self.connections[fd].recv(1024)
                 if EOL1 in self.requests[fd] or EOL2 in self.requests[fd]:
+                    print ('processing request')
+                    self.process_request(self.requests[fd], fd)
                     self.epoll.modify(fd, select.EPOLLOUT)
-                print('-' * 40 + '\n' + self.requests[fd].decode()[:-2])
             elif event & select.EPOLLOUT:
-                byteswritten = self.connections[fd].send(self.responses[fd])
-                self.responses[fd] = self.responses[fd][byteswritten:]
+                print ('data to write')
+                print (self.responses[fd])
+                byteswritten = self.connections[fd].send(self.responses[fd].getvalue())
+                print ('wrote {} bytes'.format(byteswritten))
+                self.responses[fd] = self.responses[fd].getbuffer()[byteswritten:]
                 if len(self.responses[fd]) == 0:
+                    print ('closing fd')
                     self.epoll.modify(fd, 0)
-                    self.connections[fd].shutdown(self.socket.SHUT_RDWR)
+                    self.connections[fd].shutdown(socket.SHUT_WR)
             elif event & select.EPOLLHUP:
+                print ('closing fd epollhup')
                 self.epoll.unregister(fd)
                 self.connections[fd].close()
                 del self.connections[fd]
 
+    def shutdown_request(self, request):
+        pass
+
+
+class EPollRequestHandlerMixin():
+    def setup(self):
+        self.rfile = io.BytesIO(self.server.requests[self.fd])
+        self.wfile = self.server.responses[self.fd]
+
+    def __init__(self, request, client_address, server, fd):
+        self.request = request
+        self.server = server
+        self.connection = self.server.connections[fd]
+        self.client_address = self.server.addresses[fd]
+        self.fd = fd
+        self.setup()
+        try:
+            self.handle()
+        finally:
+            self.finish()
+
+    def finish(self):
+        self.rfile.close()
+
+
 
 class EPollTCPServer(EPollMixin, socketserver.TCPServer):
+    pass
+
+
+class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHandler):
     pass
 
 

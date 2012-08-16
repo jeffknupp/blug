@@ -214,19 +214,18 @@ def create_post(title, content_dir):
 
 def serve(arguments):
     """Serve static HTML pages indefinately"""
-    import http.server
-    import socketserver
 
     if 'root' in arguments:
         os.chdir(arguments['root'])
-    handler = http.server.SimpleHTTPRequestHandler
+    handler = lib.blug_http.EPollRequestHandler
 
     httpd = lib.blug_http.BlugHttpServer((arguments['host'], int(arguments['port'])),
             handler)
 
     print("serving from {path} on port {port}".format(path=arguments['root'],
         port=arguments['port']))
-    httpd.serve_forever()
+    while True:
+        httpd.handle_request()
 
 
 def create_new_post(arguments):
