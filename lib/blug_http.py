@@ -29,49 +29,6 @@ RUSAGE = """0	{}	time in user mode (float)
 EOL1 = b'\r\n'
 EOL2 = b'\n\n'
 
-"""
-serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-serversocket.bind(('0.0.0.0', 8080))
-serversocket.listen(1)
-serversocket.setblocking(0)
-
-epoll = select.epoll()
-epoll.register(serversocket.fileno(), select.EPOLLIN)
-
-try:
-   connections = {}; requests = {}; responses = {}
-   while True:
-      events = epoll.poll(1)
-      for fileno, event in events:
-         if fileno == serversocket.fileno():
-            connection, address = serversocket.accept()
-            connection.setblocking(0)
-            epoll.register(connection.fileno(), select.EPOLLIN)
-            connections[connection.fileno()] = connection
-            requests[connection.fileno()] = b''
-            responses[connection.fileno()] = response
-         elif event & select.EPOLLIN:
-            requests[fileno] += connections[fileno].recv(1024)
-            if EOL1 in requests[fileno] or EOL2 in requests[fileno]:
-               epoll.modify(fileno, select.EPOLLOUT)
-               print('-'*40 + '\n' + requests[fileno].decode()[:-2])
-         elif event & select.EPOLLOUT:
-            byteswritten = connections[fileno].send(responses[fileno])
-            responses[fileno] = responses[fileno][byteswritten:]
-            if len(responses[fileno]) == 0:
-               epoll.modify(fileno, 0)
-               connections[fileno].shutdown(socket.SHUT_RDWR)
-         elif event & select.EPOLLHUP:
-            epoll.unregister(fileno)
-            connections[fileno].close()
-            del connections[fileno]
-finally:
-   epoll.unregister(serversocket.fileno())
-   epoll.close()
-   serversocket.close()
-"""
-
 
 class EPollMixin:
     """Mixin for socketserver.BaseServer to use epoll instead of select"""
@@ -89,7 +46,6 @@ class EPollMixin:
 
     def finish_request(self, request, client_address):
         """Finish one request by instantiating RequestHandlerClass."""
-        print ('finish_request')
         self.RequestHandlerClass(request, client_address, self, client_address)
 
     def handle_request(self):
@@ -99,35 +55,26 @@ class EPollMixin:
         use epoll (and later do the same for kqpoll)"""
         events = self.epoll.poll()
         for fd, event in events:
-            print ('events start')
             if fd == self.fileno():
                 connection, address = self.socket.accept()
                 connection.setblocking(0)
-                print ('accepting fd {}'.format(connection.fileno()))
                 self.epoll.register(connection.fileno(), select.EPOLLIN)
                 self.connections[connection.fileno()] = connection
                 self.requests[connection.fileno()] = bytes()
                 self.responses[connection.fileno()] = io.BytesIO()
                 self.addresses[connection.fileno()] = address
             elif event & select.EPOLLIN:
-                print ('data to read')
                 self.requests[fd] += self.connections[fd].recv(1024)
                 if EOL1 in self.requests[fd] or EOL2 in self.requests[fd]:
-                    print ('processing request')
                     self.process_request(self.requests[fd], fd)
                     self.epoll.modify(fd, select.EPOLLOUT)
             elif event & select.EPOLLOUT:
-                print ('data to write')
-                print (self.responses[fd])
                 byteswritten = self.connections[fd].send(self.responses[fd].getvalue())
-                print ('wrote {} bytes'.format(byteswritten))
                 self.responses[fd] = self.responses[fd].getbuffer()[byteswritten:]
                 if len(self.responses[fd]) == 0:
-                    print ('closing fd')
                     self.epoll.modify(fd, 0)
                     self.connections[fd].shutdown(socket.SHUT_WR)
             elif event & select.EPOLLHUP:
-                print ('closing fd epollhup')
                 self.epoll.unregister(fd)
                 self.connections[fd].close()
                 del self.connections[fd]
