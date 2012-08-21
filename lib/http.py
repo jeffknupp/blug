@@ -104,8 +104,8 @@ class EPollRequestHandlerMixin():
     def finish(self):
         self.rfile.close()
 
-    def log_request(self, code='-', size='-'):
-        pass
+    #def log_request(self, code='-', size='-'):
+    #    pass
 
 
 class EPollTCPServer(EPollMixin, socketserver.TCPServer):
@@ -115,12 +115,17 @@ class EPollTCPServer(EPollMixin, socketserver.TCPServer):
 class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
-        cType = self.guess_type(self.path)
         path = self.translate_path(self.path)
-        if self.path.endswith('/'):
-            self.path = os.path.join(path, 'index.html')
 
+        if os.path.isdir(path):
+            self.path = os.path.join(self.path, 'index.html')
+
+        print (path, self.path)
+        cType = self.guess_type(self.path)
         file_buffer = self.server.file_cache.get_resource(self.path)
+        if not file_buffer:
+            self.send_error(404, "File not found")
+            return None
 
         #TODO: Cache header along with file and send directly
         self.send_response(200)
@@ -133,8 +138,8 @@ class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHand
 
 class BlugHttpServer(EPollTCPServer):
 
-    def __init__(self, *args, **kwargs):
-        self.file_cache = FileCache('/home/a823222/other/blug/generated/', 1)
+    def __init__(self, root, *args, **kwargs):
+        self.file_cache = FileCache(root)
         print (self.file_cache)
         EPollTCPServer.__init__(self, *args, **kwargs)
 
@@ -165,15 +170,17 @@ class FileCache():
         self._debug = debug
         self.build_cache(self.base)
 
-    def build_cache(self, base_dir):
-        for name in os.listdir(base_dir):
-            name = os.path.join(base_dir, name)
+    def build_cache(self, base_dir, current_dir=None):
+        if not current_dir:
+            current_dir = os.path.relpath(base_dir)
+        for name in os.listdir(current_dir):
+            name = os.path.join(current_dir, name)
             if not os.path.splitext(name)[1] in self.FILE_TYPES:
                 if os.path.isdir(name):
-                    self.build_cache(name)
+                    self.build_cache(base_dir, name)
             else:
                 with open(name, 'rb') as input_file:
-                    self.cache[name] = bytes(input_file.read())
+                    self.cache[name[1:]] = bytes(input_file.read())
 
     def get_resource(self, path):
         if path in self.cache:
