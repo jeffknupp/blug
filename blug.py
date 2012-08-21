@@ -9,7 +9,7 @@ import datetime
 import shutil
 import argparse
 import collections
-import lib.blug_http
+import lib.http
 
 POST_SKELETON = """
 title: "{title}"
@@ -212,18 +212,18 @@ def create_post(title, content_dir):
         post_file.write(POST_SKELETON.format(date=post_date, title=title))
 
 
-def serve(arguments):
+def serve(*args, **kwargs):
     """Serve static HTML pages indefinately"""
 
-    if 'root' in arguments:
-        os.chdir(arguments['root'])
-    handler = lib.blug_http.EPollRequestHandler
+    root = kwargs['root']
+    os.chdir(root)
+    handler = lib.http.EPollRequestHandler
 
-    httpd = lib.blug_http.BlugHttpServer((arguments['host'], int(arguments['port'])),
+    httpd = lib.http.BlugHttpServer(root, (kwargs['host'], int(kwargs['port'])),
             handler)
 
-    print("serving from {path} on port {port}".format(path=arguments['root'],
-        port=arguments['port']))
+    print("serving from {path} on port {port}".format(path=root,
+        port=kwargs['port']))
 
     while True:
         httpd.handle_request()
@@ -296,7 +296,7 @@ def main():
     arguments = argument_parser.parse_args()
 
     argument_dict = vars(arguments)
-    arguments.func(argument_dict)
+    arguments.func(**argument_dict)
     print ('Complete')
 
 
