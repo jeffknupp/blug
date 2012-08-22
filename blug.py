@@ -234,20 +234,17 @@ def run_server(httpd):
         httpd.handle_request()
 
 
-
-def create_new_post(arguments):
-    """pass"""
+def create_new_post(*args, **kwargs):
     site_config = dict()
     config_file = 'config.yml'
     if os.path.exists('config.local.yml'):
         config_file = 'config.local.yml'
     with open(config_file, 'r') as config_file_handle:
         site_config = yaml.load(config_file_handle.read())
-    create_post(arguments['title'], site_config['content_dir'])
+    create_post(kwargs['title'], site_config['content_dir'])
 
 
-def generate_site(arguments):
-    """pass"""
+def generate_site(*args, **kwargs):
     site_config = dict()
     config_file = 'config.yml'
     if os.path.exists('config.local.yml'):

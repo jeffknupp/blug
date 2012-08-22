@@ -40,6 +40,7 @@ class EPollMixin:
         self.requests = dict()
         self.responses = dict()
         self.addresses = dict()
+        self.status = dict()
         self.socket.listen(75)
         self.socket.settimeout(0.0)
         self.epoll = select.epoll()
@@ -64,21 +65,28 @@ class EPollMixin:
                 self.requests[connection.fileno()] = bytearray(65536)
                 self.responses[connection.fileno()] = io.BytesIO()
                 self.addresses[connection.fileno()] = address
+                self.status[connection.fileno()] = True
             elif event & select.EPOLLIN:
                 self.connections[fd].recv_into(self.requests[fd], 1024)
                 if EOL1 in self.requests[fd] or EOL2 in self.requests[fd]:
                     self.process_request(self.requests[fd], fd)
-                    self.epoll.modify(fd, select.EPOLLOUT)
+                    if self.status[fd]:
+                        self.epoll.modify(fd, select.EPOLLOUT)
             elif event & select.EPOLLOUT:
                 byteswritten = self.connections[fd].send(self.responses[fd].getvalue())
                 self.responses[fd] = self.responses[fd].getbuffer()[byteswritten:]
                 if len(self.responses[fd]) == 0:
-                    self.epoll.modify(fd, 0)
-                    self.connections[fd].close()
+                    self.epoll.modify(fd, select.EPOLLIN)
             elif event & select.EPOLLHUP:
                 self.epoll.unregister(fd)
                 self.connections[fd].close()
                 del self.connections[fd]
+
+    def close_connection(self, fd):
+        print (fd, 'closing')
+        self.epoll.modify(fd, 0)
+        self.status[fd] = False
+        self.connections[fd].close()
 
     def shutdown_request(self, request):
         pass
@@ -96,13 +104,16 @@ class EPollRequestHandlerMixin():
         self.client_address = self.server.addresses[fd]
         self.fd = fd
         self.setup()
+        self.protocol_version = 'HTTP/1.1'
         try:
             self.handle()
         finally:
             self.finish()
 
     def finish(self):
-        self.rfile.close()
+        if self.close_connection:
+            self.server.close_connection(self.fd)
+            self.rfile.close()
 
     #def log_request(self, code='-', size='-'):
     #    pass
@@ -120,6 +131,8 @@ class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHand
         if os.path.isdir(path):
             self.path = os.path.join(self.path, 'index.html')
 
+        self.path = self.path.split('?', 1)[0]
+        self.path = self.path.split('#', 1)[0]
         print (path, self.path)
         cType = self.guess_type(self.path)
         file_buffer = self.server.file_cache.get_resource(self.path)
@@ -162,7 +175,7 @@ def start_server(host='localhost', port=8000,
 class FileCache():
     """An in-memory cache of static files"""
 
-    FILE_TYPES = ['.html', '.js', '.css']
+    FILE_TYPES = ['.html', '.js', '.css', '.png']
 
     def __init__(self, base, debug=0):
         self.base = os.path.normpath(base)
