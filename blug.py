@@ -217,7 +217,7 @@ def serve(*args, **kwargs):
 
     root = kwargs['root']
     os.chdir(root)
-    handler = lib.http.EPollRequestHandler
+    handler = lib.http.FileCacheRequestHandler
 
     httpd = lib.http.BlugHttpServer(root, (kwargs['host'], int(kwargs['port'])),
             handler)

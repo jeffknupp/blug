@@ -1,14 +1,10 @@
 """HTTP server and utilities"""
 
 import os
-import io
 import os.path
-import resource
-import select
 import socketserver
 import socket
 from http import server
-import datetime
 
 RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
@@ -31,99 +27,7 @@ EOL1 = b'\r\n'
 EOL2 = b'\n\n'
 
 
-class EPollMixin:
-    """Mixin for socketserver.BaseServer to use epoll instead of select"""
-
-    def server_activate(self):
-        """Increase the request_queue_size and set non-blocking"""
-        self.connections = dict()
-        self.requests = dict()
-        self.responses = dict()
-        self.addresses = dict()
-        self.status = dict()
-        self.socket.listen(75)
-        self.socket.settimeout(0.0)
-        self.epoll = select.epoll()
-        self.epoll.register(self.fileno(), select.EPOLLIN)
-
-    def finish_request(self, request, client_address):
-        """Finish one request by instantiating RequestHandlerClass."""
-        self.RequestHandlerClass(request, client_address, self, client_address)
-
-    def handle_request(self):
-        """Handle one request, possibly blocking. Does NOT respect timeout.
-
-        To avoid the overhead of select with many client connections,
-        use epoll (and later do the same for kqpoll)"""
-        events = self.epoll.poll()
-        for fd, event in events:
-            if fd == self.fileno():
-                connection, address = self.socket.accept()
-                connection.setblocking(0)
-                self.epoll.register(connection.fileno(), select.EPOLLIN)
-                self.connections[connection.fileno()] = connection
-                self.requests[connection.fileno()] = bytearray(65536)
-                self.responses[connection.fileno()] = io.BytesIO()
-                self.addresses[connection.fileno()] = address
-                self.status[connection.fileno()] = True
-            elif event & select.EPOLLIN:
-                self.connections[fd].recv_into(self.requests[fd], 1024)
-                if EOL1 in self.requests[fd] or EOL2 in self.requests[fd]:
-                    self.process_request(self.requests[fd], fd)
-                    if self.status[fd]:
-                        self.epoll.modify(fd, select.EPOLLOUT)
-            elif event & select.EPOLLOUT:
-                byteswritten = self.connections[fd].send(self.responses[fd].getvalue())
-                self.responses[fd] = self.responses[fd].getbuffer()[byteswritten:]
-                if len(self.responses[fd]) == 0:
-                    self.epoll.modify(fd, select.EPOLLIN)
-            elif event & select.EPOLLHUP:
-                self.epoll.unregister(fd)
-                self.connections[fd].close()
-                del self.connections[fd]
-
-    def close_connection(self, fd):
-        print (fd, 'closing')
-        self.epoll.modify(fd, 0)
-        self.status[fd] = False
-        self.connections[fd].close()
-
-    def shutdown_request(self, request):
-        pass
-
-
-class EPollRequestHandlerMixin():
-    def setup(self):
-        self.rfile = io.BytesIO(self.server.requests[self.fd])
-        self.wfile = self.server.responses[self.fd]
-
-    def __init__(self, request, client_address, server, fd):
-        self.request = request
-        self.server = server
-        self.connection = self.server.connections[fd]
-        self.client_address = self.server.addresses[fd]
-        self.fd = fd
-        self.setup()
-        self.protocol_version = 'HTTP/1.1'
-        try:
-            self.handle()
-        finally:
-            self.finish()
-
-    def finish(self):
-        if self.close_connection:
-            self.server.close_connection(self.fd)
-            self.rfile.close()
-
-    #def log_request(self, code='-', size='-'):
-    #    pass
-
-
-class EPollTCPServer(EPollMixin, socketserver.TCPServer):
-    pass
-
-
-class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHandler):
+class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         path = self.translate_path(self.path)
@@ -133,7 +37,6 @@ class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHand
 
         self.path = self.path.split('?', 1)[0]
         self.path = self.path.split('#', 1)[0]
-        print (path, self.path)
         cType = self.guess_type(self.path)
         file_buffer = self.server.file_cache.get_resource(self.path)
         if not file_buffer:
@@ -148,28 +51,15 @@ class EPollRequestHandler(EPollRequestHandlerMixin, server.SimpleHTTPRequestHand
         self.end_headers()
         self.wfile.write(file_buffer)
 
+    def log_request(self, code='-', size='-'):
+        pass
 
-class BlugHttpServer(EPollTCPServer):
+
+class BlugHttpServer(server.HTTPServer):
 
     def __init__(self, root, *args, **kwargs):
         self.file_cache = FileCache(root)
-        print (self.file_cache)
-        EPollTCPServer.__init__(self, *args, **kwargs)
-
-    """epoll based http server"""
-    def server_bind(self):
-        """Override server_bind to store the server name."""
-        socketserver.TCPServer.server_bind(self)
-        host, port = self.socket.getsockname()[:2]
-        self.server_name = socket.getfqdn(host)
-        self.server_port = port
-
-
-def start_server(host='localhost', port=8000,
-        handler_class=server.SimpleHTTPRequestHandler):
-    address = (host, port)
-    http_server = BlugHttpServer(address, handler_class)
-    http_server.serve_forever()
+        server.HTTPServer.__init__(self, *args, **kwargs)
 
 
 class FileCache():
