@@ -34,7 +34,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
 
     for post_file_name in input_files:
         post_file_buffer = str()
-        with open(os.path.join(content_dir, post_file_name), 'r') as post_file:
+        with open(os.path.join(content_dir, post_file_name), 'r', encoding='ascii') as post_file:
             post_file_buffer = post_file.read()
 
         # Split the file into the YAML front matter and the post proper
