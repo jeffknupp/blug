@@ -45,7 +45,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         # content to display on the front page until <!--more--> is reached)
         # and the post proper
         post['body'] = markdown.markdown(post_body, ['fenced_code',
-            'codehilite'])
+            'codehilite', 'tables'])
         (teaser, _, _) = post['body'].partition('<!--more-->')
         post['teaser'] = teaser
         post['categories'] = post['categories'].split()
