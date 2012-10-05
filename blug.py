@@ -117,7 +117,7 @@ def generate_static_page(template_variables, output_dir, template_name,
     """Generate a static page"""
     template = template_variables['env'].get_template(template_name)
     create_path_to_file(output_dir)
-    with open(os.path.join(output_dir, filename), 'w') as output_file:
+    with open(os.path.join(output_dir, filename), 'w', encoding='ascii') as output_file:
         output_file.write(template.render(template_variables))
 
 
