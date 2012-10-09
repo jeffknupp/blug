@@ -33,6 +33,9 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
     all_posts = list()
 
     for post_file_name in input_files:
+        if os.path.splitext(post_file_name)[1] != ".md":
+            continue
+
         post_file_buffer = str()
         with open(os.path.join(content_dir, post_file_name), 'r', encoding='ascii') as post_file:
             post_file_buffer = post_file.read()
