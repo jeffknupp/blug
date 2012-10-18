@@ -187,7 +187,10 @@ def generate_all_files(site_config):
     generate_pagination_pages(site_config)
 
     for index, post in enumerate(all_posts):
-        post['post_previous'] = all_posts[index - 1]
+        try:
+            post['post_previous'] = all_posts[index + 1]
+        except:
+            post['post_previous'] = all_posts[0]
         generate_post(post, site_config)
 
 
