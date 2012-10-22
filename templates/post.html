@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
         {% block canonical_url %}{{ post.canonical_url }}{% endblock %}
         {% block content %}
+        {% block title %}{{ post.title }}{% endblock %}
       <div>
 <article class="hentry" role="article">
   <header>
