@@ -2,4 +2,3 @@ Jinja2>=2.6
 Markdown>=2.2.0
 PyYAML>=3.10
 Pygments>=1.5
-distribute>=0.6.27
