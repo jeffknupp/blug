@@ -9,7 +9,8 @@ import datetime
 import shutil
 import argparse
 import collections
-import lib.http
+import lib.blug_server
+import statprof
 
 POST_SKELETON = """
 title: "{title}"
@@ -220,25 +221,19 @@ def create_post(title, content_dir):
 
 def serve(*args, **kwargs):
     """Serve static HTML pages indefinately"""
-
     root = kwargs['root']
     os.chdir(root)
-    handler = lib.http.FileCacheRequestHandler
+    handler = lib.blug_server.FileCacheRequestHandler
+    def log_request(self, code):
+        pass
 
-    httpd = lib.http.BlugHttpServer(root, (kwargs['host'], int(kwargs['port'])),
+    httpd = lib.blug_server.BlugHttpServer(root, (kwargs['host'], int(kwargs['port'])),
             handler)
 
     print("serving from {path} on port {port}".format(path=root,
         port=kwargs['port']))
 
-    while True:
-        httpd.handle_request()
-
-
-def run_server(httpd):
-    for x in range(10000):
-        httpd.handle_request()
-
+    httpd.serve_forever()
 
 def create_new_post(*args, **kwargs):
     site_config = dict()

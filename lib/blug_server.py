@@ -2,9 +2,8 @@
 
 import os
 import os.path
-import socketserver
-import socket
 from http import server
+import resource
 
 RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
@@ -107,16 +106,21 @@ class FileCache():
 
 def print_usage_stats(rusage_struct):
     return  RUSAGE.format(rusage_struct.ru_utime, rusage_struct.ru_stime,
-    rusage_struct.ru_maxrss, rusage_struct.ru_ixrss, rusage_struct.ru_idrss,
-    rusage_struct.ru_isrss, rusage_struct.ru_minflt, rusage_struct.ru_majflt,
-    rusage_struct.ru_nswap, rusage_struct.ru_inblock, rusage_struct.ru_oublock,
-    rusage_struct.ru_msgsnd, rusage_struct.ru_msgrcv,
-    rusage_struct.ru_nsignals, rusage_struct.ru_nvcsw,
-    rusage_struct.ru_nivcsw)
+        rusage_struct.ru_maxrss, rusage_struct.ru_ixrss, rusage_struct.ru_idrss,
+        rusage_struct.ru_isrss, rusage_struct.ru_minflt, rusage_struct.ru_majflt,
+        rusage_struct.ru_nswap, rusage_struct.ru_inblock, rusage_struct.ru_oublock,
+        rusage_struct.ru_msgsnd, rusage_struct.ru_msgrcv,
+        rusage_struct.ru_nsignals, rusage_struct.ru_nvcsw,
+        rusage_struct.ru_nivcsw)
+
+def start_server():
+    httpd = BlugHttpServer('/home/jeff/code/my_git_repos/blug/', ('localhost', 8082),
+            FileCacheRequestHandler)
+    while True:
+        httpd.handle_request()
 
 if __name__ == '__main__':
-    start_server()
-    #cache = FileCache('/home/jeff/code/blug/generated/', 1)
-    #print (cache)
-    #usage = resource.getrusage(resource.RUSAGE_SELF)
-    #print (print_usage_stats(usage))
+    cache = FileCache('/home/jeff/code/my_git_repos/blug/generated/', 1)
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    print (print_usage_stats(usage))
+    print (cache)
