@@ -1,7 +1,6 @@
 """HTTP server and utilities"""
 
 import os
-import os.path
 from http import server
 import resource
 
@@ -27,8 +26,10 @@ EOL2 = b'\n\n'
 
 
 class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
+    """Request handler that serves cached versions of static files"""
 
     def do_GET(self):
+        """Return the cached buffer created during initialization"""
         path = self.translate_path(self.path)
 
         if os.path.isdir(path):
@@ -51,10 +52,12 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
         self.wfile.write(file_buffer)
 
     def log_request(self, code='-', size='-'):
+        """Log no information on incoming requests"""
         pass
 
 
 class BlugHttpServer(server.HTTPServer):
+    """An extension to http.server.HTTPServer utilizing the FileCacheRequestHandler"""
 
     def __init__(self, root, *args, **kwargs):
         self.file_cache = FileCache(root)
@@ -73,6 +76,7 @@ class FileCache():
         self.build_cache(self.base)
 
     def build_cache(self, base_dir, current_dir=None):
+        """Builds a cache of file contents recursively from the base_dir"""
         if not current_dir:
             current_dir = os.path.relpath(base_dir)
         for name in os.listdir(current_dir):
@@ -85,6 +89,7 @@ class FileCache():
                     self.cache[name[1:]] = bytes(input_file.read())
 
     def get_resource(self, path):
+        """Returns the cached version of the file"""
         if path in self.cache:
             return memoryview(self.cache[path])
         return None
@@ -105,6 +110,7 @@ class FileCache():
 
 
 def print_usage_stats(rusage_struct):
+    """Display resource usage statistics for the file cache"""
     return  RUSAGE.format(rusage_struct.ru_utime, rusage_struct.ru_stime,
         rusage_struct.ru_maxrss, rusage_struct.ru_ixrss, rusage_struct.ru_idrss,
         rusage_struct.ru_isrss, rusage_struct.ru_minflt, rusage_struct.ru_majflt,
@@ -114,6 +120,7 @@ def print_usage_stats(rusage_struct):
         rusage_struct.ru_nivcsw)
 
 def start_server():
+    """Start the HTTP server"""
     httpd = BlugHttpServer('/home/jeff/code/my_git_repos/blug/', ('localhost', 8082),
             FileCacheRequestHandler)
     while True:
