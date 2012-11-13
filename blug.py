@@ -10,7 +10,6 @@ import shutil
 import argparse
 import collections
 import lib.blug_server
-import statprof
 
 POST_SKELETON = """
 title: "{title}"
@@ -20,7 +19,7 @@ categories:
 """
 
 
-def generate_post_filepath(title, date):
+def generate_post_file_path(title, date):
     """Return the path a post should use based on its title and date"""
     post_file_date = datetime.datetime.strftime(date, '%Y/%m/%d/')
     title = ''.join(char for char in title.lower() if (
@@ -37,8 +36,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         if os.path.splitext(post_file_name)[1] != ".md":
             continue
 
-        post_file_buffer = str()
-        with open(os.path.join(content_dir, post_file_name), 'r', encoding='ascii') as post_file:
+        with open(os.path.join(content_dir, post_file_name), encoding='ascii') as post_file:
             post_file_buffer = post_file.read()
 
         # Split the file into the YAML front matter and the post proper
@@ -66,7 +64,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         # www.widgetfactory.com/marketing/blog/, we would generate the
         # files in the /blog sub-directory but the links would need to
         # include /marketing/blog
-        post['relative_path'] = generate_post_filepath(post['title'],
+        post['relative_path'] = generate_post_file_path(post['title'],
                 post['date']) + '/'
         if blog_prefix:
             post['relative_path'] = os.path.join(
@@ -103,9 +101,6 @@ def generate_post(post, template_variables):
         raise EnvironmentError('No content for post [{post}] found.'.format(
             post=post['relative_path']))
 
-    # Probably need a better value for 'description', but this will
-    # do for now
-    post['description'] = post['body'].split()[0]
     # Need to keep 'post' and 'site' variables separate
     post_vars = {'post': post}
 
@@ -166,7 +161,7 @@ def generate_pagination_pages(site_config):
 
 
 def generate_all_files(site_config):
-    """Generate all HTML files from the content directory using the sitewide
+    """Generate all HTML files from the content directory using the site-wide
     configuration"""
     all_posts = get_all_posts(site_config['content_dir'],
             site_config['blog_prefix'], site_config['url'],
@@ -190,7 +185,7 @@ def generate_all_files(site_config):
     for index, post in enumerate(all_posts):
         try:
             post['post_previous'] = all_posts[index + 1]
-        except:
+        except IndexError:
             post['post_previous'] = all_posts[0]
         generate_post(post, site_config)
 
@@ -205,7 +200,7 @@ def copy_static_content(output_dir, root_dir):
 
 def create_post(title, content_dir):
     """Create an empty post with the YAML front matter generated"""
-    post_file_name = generate_post_filepath(title, datetime.datetime.now())
+    post_file_name = generate_post_file_path(title, datetime.datetime.now())
     post_file_name = post_file_name.replace('/', '-') + '.md'
 
     post_date = datetime.datetime.strftime(
@@ -220,11 +215,12 @@ def create_post(title, content_dir):
 
 
 def serve(*args, **kwargs):
-    """Serve static HTML pages indefinately"""
+    """Serve static HTML pages indefinitely"""
     root = kwargs['root']
     os.chdir(root)
     handler = lib.blug_server.FileCacheRequestHandler
-    def log_request(self, code):
+    def log_request(self, *args):
+        """Do not log any requests while serving"""
         pass
 
     httpd = lib.blug_server.BlugHttpServer(root, (kwargs['host'], int(kwargs['port'])),
@@ -236,21 +232,21 @@ def serve(*args, **kwargs):
     httpd.serve_forever()
 
 def create_new_post(*args, **kwargs):
-    site_config = dict()
+    """Creates a new blog post file with the correct path and YAML front matter filled in"""
     config_file = 'config.yml'
     if os.path.exists('config.local.yml'):
         config_file = 'config.local.yml'
-    with open(config_file, 'r') as config_file_handle:
+    with open(config_file) as config_file_handle:
         site_config = yaml.load(config_file_handle.read())
-    create_post(kwargs['title'], site_config['content_dir'])
+        create_post(kwargs['title'], site_config['content_dir'])
 
 
 def generate_site(*args, **kwargs):
-    site_config = dict()
+    """Generate the static HTML pages based on the YAML configuration file and content directory"""
     config_file = 'config.yml'
     if os.path.exists('config.local.yml'):
         config_file = 'config.local.yml'
-    with open(config_file, 'r') as config_file_handle:
+    with open(config_file) as config_file_handle:
         site_config = yaml.load(config_file_handle.read())
 
     site_config['blog_dir'] = site_config['output_dir']
