@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="article-list">
+{% for post in recent_posts %} 
+<div itemprop="blogPost">
+    {% include 'post.html' %}
+</div>
+    {% endfor %}  
+    <a class="prev" href="/blog/page//page/2/">&larr; Older</a>
+    <a href="/blog/archives">Blog Archives</a>
+</div>
+{% endblock %}

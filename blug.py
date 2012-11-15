@@ -2,6 +2,7 @@
 """Static blog generator"""
 
 import jinja2
+import sys
 import markdown
 import os
 import yaml
@@ -301,4 +302,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

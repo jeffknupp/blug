@@ -1,0 +1,7 @@
+<header>
+<h1><a href="{{ post.relative_url}}"><span itemprop="headline">{{ post.title }}</span></a></h1>
+<p>
+Posted at <time datetime="{{ post.date }}" pubdate data-updated="true" itemprop="datePublished">{{ post.date.strftime('%b %d, %Y') }}</time> by <span itemprop="author"> Jeff Knupp</span>
+</p>
+</header>
+
