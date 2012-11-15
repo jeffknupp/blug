@@ -6,7 +6,7 @@
   <h2>2012</h2>
   {% for post in all_posts %}
   <article itemscope itemtype="http://schema.org/BlogPosting">
-  {% import "post_heading.html" %}
+  {% include "post_heading.html" %}
     <footer>
     <p>posted in 
     {% for category in post.categories %}

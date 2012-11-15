@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<section itemscope itemtype="http://schema.org/Person">
+<header>
+<hgroup>
+<h1>About Me</h1>
+<h2>Who is Jeff Knupp?</h2>
+</hgroup>
+<dl>
+    <dt>Name</dt>
+    <dd itemprop="name">Jeff Knupp</dd>
+    <dt>Email</dt>
+    <dd itemprop="email">jeff@jeffknupp.com</dd>
+</dl>
+<p itemprop="description">I&#8217;m a 30 year old NYC based C++ developer specializing in ultra low-latency, high-throughput servers for the finance industry. I&#8217;m also an avid
+Python and Django hacker and the creator of this blog.</p>
+
+<ul>
+    <li><a href="http://www.twitter.com/jeffknupp" itemprop="memberOf">@jeffknupp on Twitter</a></li>
+    <li><a href="http://www.github.com/jeffknupp" itemprop="memberOf">jeffknupp on GitHub</a></li>
+    <li><a href="http://news.ycombinator.com" itemprop="memberOf">jknupp on Hacker News</a></li>
+    <li><a href="http://www.reddit.com" itemprop="memberOf">jknupp on Reddit</a></li>
+    <li><a href="http://stackoverflow.com/users/301749/jknupp" itemprop="memberOf">jknupp on StackOverflow</a></li>
+</ul>
+
+
+<h2>You posted something I strongly agree/disagree with. How can I contact you directly?</h2>
+<p>Feel free to email me at <a href="mailto:jeff@jeffknupp.com">jeff@jeffknupp.com</a> or
+leave a comment on the article.</p>
+
+<h2>I&#8217;m having trouble with X, which you posted about. Can you help?</h2>
+
+<p>I&#8217;d be happy to try. I would be nowhere without the mentoring and support of fellow
+programmers/open source software projects. I&#8217;m always looking for a
+chance to give back.</p>
+
+<h2>How do you host your various ?</h2>
+
+<p>I&#8217;ve been using <a href="http://www.linode.com/?r=ae1808f234f8e219de24842336fada09ef81d52f">Linode</a> (note, my affiliate code is in there) for about a year and couldn&#8217;t be happier. I&#8217;m running all of my  on a single Linode: Ubuntu 11.10 w/ 512MB RAM and a 200GB transfer cap (the basic plan). Their documentation is great, if you need it, and I&#8217;ve honestly never had a support ticket answered as fast as by &#8216;cciufo&#8217; (I just looked it up) on their support team. The problem was literally fixed in 3 minutes, at 1:06 AM no less. If I sound like a shill, it&#8217;s just because I&#8217;ve had nothing but good interactions with them. <a href="http://www.linode.com">Here&#8217;s a link without my affiliate code</a>.</p>
+</section>
+{% endblock %}

@@ -127,9 +127,9 @@ def generate_static_files(site_config):
     # at both the root level and the 'blog' level, so both www.foo.com and
     # www.foo.com/blog can serve the blog
     generate_static_page(site_config,
-            site_config['output_dir'], 'index.html')
+            site_config['output_dir'], 'list.html')
     generate_static_page(site_config,
-            site_config['blog_dir'], 'index.html')
+            site_config['blog_dir'], 'list.html')
     generate_static_page(site_config,
             os.path.join(site_config['blog_dir'],
                 'archives'), 'archives.html')
