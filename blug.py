@@ -106,7 +106,7 @@ def generate_post(post, template_variables):
     post_vars = {'post': post}
 
     template_variables.update(post_vars)
-    template = template_variables['env'].get_template('post.html')
+    template = template_variables['env'].get_template('post_index.html')
     create_path_to_file(output_path)
     with open(output_path, 'w') as output:
         output.write(template.render(template_variables))

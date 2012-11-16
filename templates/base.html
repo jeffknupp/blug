@@ -11,24 +11,38 @@
   <meta name="description" content="{% block description %}{{ description }}{% endblock %}"> 
 
   <link rel="icon" href="{{ blog_root|default('', true) }}/images/favicon.png" >
+  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='/css/bootstrap.css' rel='stylesheet' type='text/css'>
+  <link href='/css/bootstrap-responsive.css' rel='stylesheet' type='text/css'>
+  <link href='/css/style.css' rel='stylesheet' type='text/css'>
   <link rel="alternate" href="{{ feed_url }}" title="{{ title }}" type="application/atom+xml">
 </head>
 <body itemscope itemtype="http://schema.org/Blog">
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span8 offset2">
     <header role="banner">
     <hgroup>
     <h1><a href="/"><span itemprop="name">{{ title }}</span></a></h1>
     <h2 itemprop="alternativeHeadline">{{ tag_line }}</h2>
-    <h3><a href="{{ blog_root|default((''), true)}}/about-me/" itemprop="author" itemscope itemtype="http://schema.org/Person">Jeff Knupp</a></h3>
+    <h3><small><a href="{{ blog_root|default((''), true)}}/about-me/" itemprop="author" itemscope itemtype="http://schema.org/Person">Jeff Knupp</a></small></h3>
     </hgroup>
     <nav role="navigation">
-    <ul>
+<div class="navbar">
+  <div class="navbar-inner">
+    <ul class="nav">
         <li><a href={{ feed_url }} rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
         <li><a href="{{ blog_root|default((''), true)}}/{{ blog_prefix }}/archives">Archives</a></li>
         <li><a href="{{ blog_root|default((''), true)}}/about-me/">About Me</a></li>
     </ul>
-    </nav>
+  </div>
+</div>
+</nav>
     </header>
     <div id="content">
         {% block content %} {{ content }} {% endblock %}
     </div>
+</div>
+</div>
+</div>
 </body>
