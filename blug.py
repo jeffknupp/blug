@@ -2,6 +2,7 @@
 """Static blog generator"""
 
 import jinja2
+import sys
 import markdown
 import os
 import yaml
@@ -105,7 +106,7 @@ def generate_post(post, template_variables):
     post_vars = {'post': post}
 
     template_variables.update(post_vars)
-    template = template_variables['env'].get_template('post.html')
+    template = template_variables['env'].get_template('post_index.html')
     create_path_to_file(output_path)
     with open(output_path, 'w') as output:
         output.write(template.render(template_variables))
@@ -126,9 +127,9 @@ def generate_static_files(site_config):
     # at both the root level and the 'blog' level, so both www.foo.com and
     # www.foo.com/blog can serve the blog
     generate_static_page(site_config,
-            site_config['output_dir'], 'index.html')
+            site_config['output_dir'], 'list.html')
     generate_static_page(site_config,
-            site_config['blog_dir'], 'index.html')
+            site_config['blog_dir'], 'list.html')
     generate_static_page(site_config,
             os.path.join(site_config['blog_dir'],
                 'archives'), 'archives.html')
@@ -301,4 +302,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

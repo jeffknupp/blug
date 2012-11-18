@@ -1,57 +1,32 @@
 {% extends 'base.html' %}
-  <div id="main">
-    <div id="content">
-        {% block content %}
-      <div>
-<article role="article">
-  
-  <header>
-    <h1 class="entry-title">About Me</h1>
-    <p class="meta">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-02-10T20:58:00-05:00" pubdate data-updated="true">Feb 10<span>th</span>, 2012</time></p>
-  </header>
-  
-  <h2>Who is Jeff Knupp?</h2>
-
-<p>I&#8217;m a 29 year old NYC based C++ developer specializing in ultra low-latency, high-throughput servers for the finance industry. I&#8217;m also an avid
-Python and Django hacker and the creator of <a href="http://www.illestrhyme.com">IllestRhyme</a> and <a href="http://www.linkrdr.com">linkrdr</a>. And this blog.</p>
-
-<h2>Wait, did you just say you&#8217;re a C++ developer? They still exist?</h2>
-
-<p>Yep, and I love what I do. When you&#8217;re writing servers that need to perform at the
-microsecond level while maintaining the dressings of higher level
-languages, C++ can&#8217;t be beat. Every programmer should learn at least one systems
-language (preferably C) inside and out.</p>
-
-<h2>Where else do you hang out online?</h2>
-
-<p>Here&#8217;s a list of my usernames on various :</p>
+{% block content %}
+<section itemscope itemtype="http://schema.org/Person">
+<header>
+<hgroup>
+<h1>About Me</h1>
+<h2>Who is Jeff Knupp?</h2>
+</hgroup>
+<dl>
+    <dt>Name</dt>
+    <dd itemprop="name">Jeff Knupp</dd>
+    <dt>Email</dt>
+    <dd itemprop="email">jeff@jeffknupp.com</dd>
+</dl>
+<p itemprop="description">I&#8217;m a 30 year old NYC based C++ developer specializing in ultra low-latency, high-throughput servers for the finance industry. I&#8217;m also an avid
+Python and Django hacker and the creator of this blog.</p>
 
 <ul>
-<li> &#8216;jknupp&#8217; on Hacker News</li>
-<li> &#8216;jknupp&#8217; on Reddit</li>
-<li> &#8216;jeffknupp&#8217; on github</li>
-<li> &#8216;jeffknupp&#8217; on BitBucket</li>
-<li> &#8216;jknupp&#8217; on StackOverflow</li>
-<li> &#8216;@jeffknupp&#8217; on Twitter</li>
+    <li><a href="http://www.twitter.com/jeffknupp" itemprop="memberOf">@jeffknupp on Twitter</a></li>
+    <li><a href="http://www.github.com/jeffknupp" itemprop="memberOf">jeffknupp on GitHub</a></li>
+    <li><a href="http://news.ycombinator.com" itemprop="memberOf">jknupp on Hacker News</a></li>
+    <li><a href="http://www.reddit.com" itemprop="memberOf">jknupp on Reddit</a></li>
+    <li><a href="http://stackoverflow.com/users/301749/jknupp" itemprop="memberOf">jknupp on StackOverflow</a></li>
 </ul>
 
 
 <h2>You posted something I strongly agree/disagree with. How can I contact you directly?</h2>
-
-<p>Feel free to email me at <a href="mailto:%20jknupp@gmail.com">jknupp@gmail.com</a> or
-leave a comment on the </p>
+<p>Feel free to email me at <a href="mailto:jeff@jeffknupp.com">jeff@jeffknupp.com</a> or
+leave a comment on the article.</p>
 
 <h2>I&#8217;m having trouble with X, which you posted about. Can you help?</h2>
 
@@ -59,73 +34,8 @@ leave a comment on the </p>
 programmers/open source software projects. I&#8217;m always looking for a
 chance to give back.</p>
 
-<h2>Your blog looks cool/makes my eyes burn, what did you use to create it?</h2>
-
-<p>Octopress, the blogging tool for hackers. It&#8217;s by far the most
-hacker-friendly blogging platform I&#8217;ve come across. It&#8217;s mostly shiny
-plugins and config defaults on top of Jekyll, a &#8216;simple, blog aware, <em>static</em> (emphasis mine)
-generator&#8217;. Jekyll is Ruby based and awesome.</p>
-
 <h2>How do you host your various ?</h2>
 
 <p>I&#8217;ve been using <a href="http://www.linode.com/?r=ae1808f234f8e219de24842336fada09ef81d52f">Linode</a> (note, my affiliate code is in there) for about a year and couldn&#8217;t be happier. I&#8217;m running all of my  on a single Linode: Ubuntu 11.10 w/ 512MB RAM and a 200GB transfer cap (the basic plan). Their documentation is great, if you need it, and I&#8217;ve honestly never had a support ticket answered as fast as by &#8216;cciufo&#8217; (I just looked it up) on their support team. The problem was literally fixed in 3 minutes, at 1:06 AM no less. If I sound like a shill, it&#8217;s just because I&#8217;ve had nothing but good interactions with them. <a href="http://www.linode.com">Here&#8217;s a link without my affiliate code</a>.</p>
-
-<h2>I&#8217;d like to write a guest post about X.</h2>
-
-<p>Unlike a lot of personal bloggers, I warmly welcome guest posters. If
-you&#8217;re an expert at something programming related (leave the amateur
-stuff to me) and have an interesting topic in mind, email me. You can link to your to your
-heart&#8217;s content. What do I care? This is a blog. I just want it to be
-useful.</p>
-
-<h2>I&#8217;ve got a great idea for a web Can you build it with/for me?</h2>
-
-<p>Sorry, but my plate is full. I&#8217;d be happy to give advice but I&#8217;ve got enough of my own projects to more than occupy my time.</p>
-
-<h2>Vi or Emacs?</h2>
-
-<p>Vi like a boss.</p>
-
-<h2>Python or Ruby?</h2>
-
-<p>Python as I find it an easier language for others to pick up. People who write code that conforms to PEP8 make me smile. That said, Ruby has some great web frameworks and is a fun language to work with.</p>
-
-<h2>Why did the last question only have two languages?</h2>
-
-<p>Because web developers (the primary audience of this blog) tend towards those two languages.  Personally, I code in C++, Python, Clojure, Haskell and various shell scripting languages.</p>
-
-  
-    <footer>
-      <p class="meta">
-        
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-02-10T20:58:00-05:00" pubdate data-updated="true">Feb 10<span>th</span>, 2012</time>
-        
-      </p>
-      
-        <div class="sharing">
-  
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.jeffknupp.com/about-me/index.html" data-via="jeffknupp" data-counturl="http://www.jeffknupp.com/about-me/index.html" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-      
-    </footer>
-  
-</article>
+</section>
 {% endblock %}
