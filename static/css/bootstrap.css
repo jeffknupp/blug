@@ -675,7 +675,7 @@ h6 small {
 h1,
 h2,
 h3 {
-  line-height: 48px;
+  line-height: 36px;
 }
 
 h1 {
@@ -683,11 +683,11 @@ h1 {
 }
 
 h2 {
-  font-size: 36px;
+  font-size: 28px;
 }
 
 h3 {
-  font-size: 28px;
+  font-size: 24px;
 }
 
 h4 {
@@ -703,7 +703,7 @@ h6 {
 }
 
 h1 small {
-  font-size: 28px;
+  font-size: 24px;
 }
 
 h2 small {
