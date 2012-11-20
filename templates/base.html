@@ -20,25 +20,25 @@
 <body itemscope itemtype="http://schema.org/Blog">
     <div class="container-fluid">
         <div class="row-fluid">
-            <div class="span8 offset2">
+            <div class="span3">
+                <div class="banner">
     <header role="banner">
     <hgroup>
     <h1><a href="/"><span itemprop="name">{{ title }}</span></a></h1>
     <h2 itemprop="alternativeHeadline">{{ tag_line }}</h2>
-    <h3><small><a href="{{ blog_root|default((''), true)}}/about-me/" itemprop="author" itemscope itemtype="http://schema.org/Person">Jeff Knupp</a></small></h3>
     </hgroup>
     <nav role="navigation">
-<div class="navbar">
-  <div class="navbar-inner">
-    <ul class="nav">
-        <li><a href={{ feed_url }} rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-        <li><a href="{{ blog_root|default((''), true)}}/{{ blog_prefix }}/archives">Archives</a></li>
-        <li><a href="{{ blog_root|default((''), true)}}/about-me/">About Me</a></li>
+    <ul class="unstyled">
+        <li><a href={{ feed_url }} rel="subscribe-rss" title="subscribe">subscribe</a></li>
+        <li><a href="{{ blog_root|default((''), true)}}/{{ blog_prefix }}/archives"> archives</a></li>
+        <li><a href="http://www.twitter.com/{{twitter_user}}">@{{twitter_user}}</a></li>
+        <li><a href="{{ blog_root|default((''), true)}}/about-me/"><span itemprop="author" itemscope itemtype="http://schema.org/Person">Jeff Knupp</span>?</a></li>
     </ul>
-  </div>
-</div>
-</nav>
+    </nav>
     </header>
+</div>
+</div>
+<div class="span6">
     <div id="content">
         {% block content %} {{ content }} {% endblock %}
     </div>

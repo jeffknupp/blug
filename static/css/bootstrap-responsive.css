@@ -34,7 +34,7 @@
 .input-block-level {
   display: block;
   width: 100%;
-  min-height: 30px;
+  min-height: 34px;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
           box-sizing: border-box;
@@ -205,7 +205,7 @@
     display: block;
     float: left;
     width: 100%;
-    min-height: 30px;
+    min-height: 34px;
     margin-left: 2.564102564102564%;
     *margin-left: 2.5109110747408616%;
     -webkit-box-sizing: border-box;
@@ -555,7 +555,7 @@
     display: block;
     float: left;
     width: 100%;
-    min-height: 30px;
+    min-height: 34px;
     margin-left: 2.7624309392265194%;
     *margin-left: 2.709239449864817%;
     -webkit-box-sizing: border-box;
@@ -849,7 +849,7 @@
   .uneditable-input {
     display: block;
     width: 100%;
-    min-height: 30px;
+    min-height: 34px;
     -webkit-box-sizing: border-box;
        -moz-box-sizing: border-box;
             box-sizing: border-box;
@@ -886,7 +886,7 @@
   }
   .page-header h1 small {
     display: block;
-    line-height: 20px;
+    line-height: 24px;
   }
   input[type="checkbox"],
   input[type="radio"] {
@@ -941,10 +941,10 @@
     position: static;
   }
   .navbar-fixed-top {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
   .navbar-fixed-bottom {
-    margin-top: 20px;
+    margin-top: 24px;
   }
   .navbar-fixed-top .navbar-inner,
   .navbar-fixed-bottom .navbar-inner {
@@ -964,7 +964,7 @@
   }
   .nav-collapse .nav {
     float: none;
-    margin: 0 0 10px;
+    margin: 0 0 12px;
   }
   .nav-collapse .nav > li {
     float: none;
@@ -1049,8 +1049,8 @@
   .nav-collapse .navbar-form,
   .nav-collapse .navbar-search {
     float: none;
-    padding: 10px 15px;
-    margin: 10px 0;
+    padding: 12px 15px;
+    margin: 12px 0;
     border-top: 1px solid #f2f2f2;
     border-bottom: 1px solid #f2f2f2;
     -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.1);
