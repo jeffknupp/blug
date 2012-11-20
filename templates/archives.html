@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
         {% block content %}
         <div>
-  <div id="blog-archives">
   <h1 class="entry-title">Blog Archive</h1>
   <h2>2012</h2>
+  <div id="blog-archives">
   {% for post in all_posts %}
   <article itemscope itemtype="http://schema.org/BlogPosting">
+  {% set header_class="small" %}
   {% include "post_heading.html" %}
     <footer>
     <p>posted in 
