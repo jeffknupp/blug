@@ -59,20 +59,27 @@
 @import "carousel.less";
 @import "hero-unit.less";
 
-.linenodiv pre { word-break: normal; }
-.article-list, .banner { h1 a { color: @black; } }
+h1 a { color: @black; }
 .banner {
     h2 { font-size: @baseFontSize; }
 }
 
 nav ul li { margin-top: 20px; }
 
-header h1 { font-size: 28px; }
+pre {
+  word-wrap: break-word;
+  white-space: pre;
+  white-space: pre-wrap;
+}
+
+.banner header h1 { font-size: 28px; }
 
 #content {
     padding-left: 1em; 
     border-left: 1px solid; 
 }
+
+body { font-family: 'Source Sans Pro', sans-serif; }
 
 // Utility classes
 @import "utilities.less"; // Has to be last to override when necessary
