@@ -11,6 +11,7 @@ import shutil
 import argparse
 import collections
 import lib.blug_server
+from copy import copy
 
 POST_SKELETON = """
 title: "{title}"
@@ -126,6 +127,9 @@ def generate_static_files(site_config):
     # Not sure if this is Octopress silliness, but generate an index.html
     # at both the root level and the 'blog' level, so both www.foo.com and
     # www.foo.com/blog can serve the blog
+    site_config = copy(site_config)
+    site_config['next_page'] = 2
+    site_config['current_posts'] = site_config['all_posts'][:5]
     generate_static_page(site_config,
             site_config['output_dir'], 'list.html')
     generate_static_page(site_config,
@@ -149,16 +153,17 @@ def generate_static_files(site_config):
 def generate_pagination_pages(site_config):
     """Generate the additional index.html files required for pagination"""
     current_page = 1
+    site_config= copy(site_config)
     all_posts = site_config['all_posts']
-    for page in [all_posts[index:index + 5] for index in range(
-        5, len(all_posts), 5)]:
+    for page in [all_posts[index:index + 5] for index in range(5, len(all_posts), 5)]:
         current_page += 1
         # Since we're reusing the index.html template, make it think
         # these posts are the only ones
-        site_config['all_posts'] = page
+        site_config['current_posts'] = page
+        site_config['next_page'] = current_page + 1
         output_dir = os.path.join(site_config['blog_dir'],
                 'page', str(current_page))
-        generate_static_page(site_config, output_dir, 'index.html')
+        generate_static_page(site_config, output_dir, 'list.html')
 
 
 def generate_all_files(site_config):
@@ -174,7 +179,6 @@ def generate_all_files(site_config):
             categories[category].append(post)
 
     site_config['now'] = datetime.datetime.now().isoformat()
-    site_config['recent_posts'] = all_posts[:5]
     site_config['all_posts'] = all_posts
     site_config['categories'] = categories
     site_config['env'] = jinja2.Environment(

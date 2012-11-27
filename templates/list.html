@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="article-list">
-{% for post in recent_posts %} 
+{% for post in current_posts %} 
 <div itemprop="blogPost">
     {% set teaser_only=true %}
     {% include 'post.html' %}
     <hr>
 </div>
     {% endfor %}  
-    <a class="prev" href="/blog/page//page/2/">&larr; Older</a>
-    <a href="/blog/archives">Blog Archives</a>
+</div>
+<div>
+    <a class="prev" href="/blog/page/{{ next_page }}/">&larr; Older</a>
+    <a href="/blog/archives" class="archive-footer">Blog Archives</a>
 </div>
 {% endblock %}
