@@ -6,6 +6,7 @@
         <p><a href="{{ post.relative_url }}">Read on &rarr;</a></p>
     {% else %}
         {{ post.body }}
+        {% include "post_footer.html" %}
     {% endif %}
 </div>
 </article>
