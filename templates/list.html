@@ -9,8 +9,10 @@
 </div>
     {% endfor %}  
 </div>
-<div>
-    <a class="prev" href="/blog/page/{{ next_page }}/">&larr; Older</a>
-    <a href="/blog/archives" class="archive-footer">Blog Archives</a>
+<div class="bottom-nav">
+    {% if next_page %}
+    <p><a class="prev pull-left" href="/blog/page/{{ next_page }}/">&larr; Older</a></p>
+    {% endif %}
+    <p><a href="/blog/archives">Blog Archives</a></p>
 </div>
 {% endblock %}
