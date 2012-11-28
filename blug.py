@@ -155,12 +155,19 @@ def generate_pagination_pages(site_config):
     current_page = 1
     site_config= copy(site_config)
     all_posts = site_config['all_posts']
+    num_posts = len(site_config['all_posts'])
     for page in [all_posts[index:index + 5] for index in range(5, len(all_posts), 5)]:
         current_page += 1
         # Since we're reusing the index.html template, make it think
         # these posts are the only ones
         site_config['current_posts'] = page
         site_config['next_page'] = current_page + 1
+
+        # if we've reached the "last" page, don't present a link to older
+        # content
+        if current_page * 5 >= num_posts:
+            site_config['next_page'] = None
+
         output_dir = os.path.join(site_config['blog_dir'],
                 'page', str(current_page))
         generate_static_page(site_config, output_dir, 'list.html')
