@@ -12,6 +12,7 @@ import argparse
 import collections
 import lib.blug_server
 from copy import copy
+import statprof
 
 POST_SKELETON = """
 title: "{title}"
@@ -152,7 +153,7 @@ def generate_static_files(site_config, posts, categories, template_environment):
 
     # Generate "About Me" page
     generate_static_page(template_variables,
-                         os.path.join(site_config['blog_dir'],
+                         os.path.join(site_config['output_dir'],
                          'about-me'), about_template)
 
     # Generate atom.xml feed
