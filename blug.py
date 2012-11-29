@@ -12,7 +12,6 @@ import argparse
 import collections
 import lib.blug_server
 from copy import copy
-import statprof
 
 POST_SKELETON = """
 title: "{title}"
