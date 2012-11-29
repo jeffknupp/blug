@@ -5828,12 +5828,6 @@ nav ul li {
   margin-top: 20px;
 }
 
-pre {
-  word-wrap: break-word;
-  white-space: pre;
-  white-space: pre-wrap;
-}
-
 .banner header h1 {
   font-size: 28px;
 }
@@ -5864,6 +5858,25 @@ pre {
 
 .bottom-nav {
   text-align: center;
+}
+
+.codehilitetable {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.codehilitetable .linenos {
+  width: 3em;
+}
+
+.codehilitetable .codehilite {
+  overflow: auto;
+}
+
+.codehilitetable pre {
+  padding-left: 1em;
+  font-family: "Source Sans Pro", sans;
+  line-height: 24px;
 }
 
 body {
