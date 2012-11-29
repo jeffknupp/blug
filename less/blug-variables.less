@@ -5,11 +5,6 @@ h1 a { color: @black; }
 
 nav ul li { margin-top: 20px; }
 
-pre {
-  word-wrap: break-word;
-  white-space: pre;
-  white-space: pre-wrap;
-}
 
 .banner header h1 { font-size: 28px; }
 
@@ -32,6 +27,22 @@ pre {
 
 .bottom-nav {
     text-align: center;
+}
+
+.codehilitetable {
+    table-layout: fixed;
+    width: 100%;
+    .linenos {
+        width: 3em;
+    }
+    .codehilite {
+        overflow: auto;
+    }
+    pre {
+        line-height: @baseLineHeight;
+        font-family: @sansFontFamily;
+        padding-left: 1em;
+    }
 }
 
 body { font-family: 'Source Sans Pro', sans-serif; }
