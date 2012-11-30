@@ -2,6 +2,7 @@
 generated/*
 content/*
 .idea
+.*swp
 
 *.py[co]
 
