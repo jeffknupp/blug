@@ -4,6 +4,15 @@ domain:
 url: 
 
 
+# Fabric-based Deployment Options
+
+# The root path where your website is served from, for 
+# example "/srv/www/mysite.com/public_html"
+public_html_dir: 
+
+# Directory to temporarily hold generated files on remote machine
+remote_staging_dir: 
+
 # The following two variables are described in this example: Imagine you're setting up
 # the blog of the marketing department of WidgetFactory. You'd like to serve it at
 # www.widgetfactory.com/marketing/blog/. In this case, 'blog_root' would be 'marketing'
