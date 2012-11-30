@@ -10,7 +10,7 @@ import datetime
 import shutil
 import argparse
 import collections
-import lib.blug_server
+from lib import blug_server
 from copy import copy
 
 POST_SKELETON = """
@@ -246,13 +246,13 @@ def serve(*args, **kwargs):
     """Serve static HTML pages indefinitely"""
     root = kwargs['root']
     os.chdir(root)
-    handler = lib.blug_server.FileCacheRequestHandler
+    handler = blug_server.FileCacheRequestHandler
 
     def log_request(self, *args):
         """Do not log any requests while serving"""
         pass
 
-    httpd = lib.blug_server.BlugHttpServer(root, (kwargs['host'],
+    httpd = blug_server.BlugHttpServer(root, (kwargs['host'],
                                            int(kwargs['port'])), handler)
 
     print("serving from {path} on port {port}".format(path=root,
@@ -284,6 +284,8 @@ def generate_site(*args, **kwargs):
 
     copy_static_content(site_config['output_dir'], os.getcwd())
     generate_all_files(site_config)
+
+    return True
 
 
 def main():
