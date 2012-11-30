@@ -5,16 +5,15 @@ import sys
 
 
 def load_settings():
-    with prefix('source /usr/bin/virtualenvwrapper.sh'), prefix('workon blug'):
-        import yaml
-        if os.path.exists('config.local.yml'):
-            config_file = 'config.local.yml'
-        with open(config_file) as config_file_handle:
-            site_config = yaml.load(config_file_handle.read())
+    import yaml
+    if os.path.exists('config.local.yml'):
+        config_file = 'config.local.yml'
+    with open(config_file) as config_file_handle:
+        site_config = yaml.load(config_file_handle.read())
 
-        env.blug_content_dir = site_config['output_dir']
-        env.public_html_dir = site_config['public_html_dir']
-        env.staging_dir = site_config['remote_staging_dir']
+    env.blug_content_dir = site_config['output_dir']
+    env.public_html_dir = site_config['public_html_dir']
+    env.remote_staging_dir = site_config['remote_staging_dir']
 
 
 @task
@@ -26,7 +25,6 @@ def check_git_status():
 
 @task
 def generate_site():
-    check_git_status()
     with prefix('source /usr/bin/virtualenvwrapper.sh'), prefix('workon blug'):
         local('python blug.py generate')
 
@@ -52,4 +50,3 @@ def copy_to_remote():
 def deploy():
     generate_site()
     copy_to_remote()
-    restart_webserver()
