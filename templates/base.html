@@ -42,7 +42,8 @@
         <li><a href={{ feed_url }} rel="subscribe-rss" title="subscribe">subscribe</a></li>
         <li><a href="{{ blog_root|default((''), true)}}/{{ blog_prefix }}/archives"> archives</a></li>
         <li><a href="http://www.twitter.com/{{twitter_user}}">@{{twitter_user}}</a></li>
-        <li><a href="{{ blog_root|default((''), true)}}/about-me/"><span itemprop="author" itemscope itemtype="http://schema.org/Person">Jeff Knupp</span>?</a></li>
+        <div itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <li><a href="{{ blog_root|default((''), true)}}/about-me/" itemprop="url">Jeff Knupp?</a></li>
     </ul>
     </nav>
     </header>
