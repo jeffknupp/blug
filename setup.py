@@ -6,7 +6,7 @@ setup(
     version = '0.2.0',
     description = 'Static site generator for Markdown based blogs, with a built-in webserver',
     author = 'Jeff Knupp',
-    author_email = 'jknupp@gmail.com',
+    author_email = 'jeff@jeffknupp.com',
     url = 'http://www.github.com/jeffknupp/blug',
     keywords = ['blog', 'markdown', 'static', 'website', 'generator'],
     packages = ['lib', 'test'],
