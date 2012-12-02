@@ -35,6 +35,93 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
     expire_time = datetime.datetime.now() + datetime.timedelta(days=365)
     timestamp = time.time()
 
+    def parse_request(self):
+        """Parse a request (internal).
+
+        The request should be stored in self.raw_requestline; the results
+        are in self.command, self.path, self.request_version and
+        self.headers.
+
+        Return True for success, False for failure; on failure, an
+        error is sent back.
+
+        """
+        self.command = None  # set in case of error on the first line
+        self.request_version = version = self.default_request_version
+        self.close_connection = 1
+        requestline = str(self.raw_requestline, 'iso-8859-1')
+        requestline = requestline.rstrip('\r\n')
+        self.requestline = requestline
+        words = requestline.split()
+        if len(words) == 3:
+            command, path, version = words
+            if version[:5] != 'HTTP/':
+                self.send_error(400, "Bad request version (%r)" % version)
+                return False
+            try:
+                base_version_number = version.split('/', 1)[1]
+                version_number = base_version_number.split(".")
+                # RFC 2145 section 3.1 says there can be only one "." and
+                #   - major and minor numbers MUST be treated as
+                #      separate integers;
+                #   - HTTP/2.4 is a lower version than HTTP/2.13, which in
+                #      turn is lower than HTTP/12.3;
+                #   - Leading zeros MUST be ignored by recipients.
+                if len(version_number) != 2:
+                    raise ValueError
+                version_number = int(version_number[0]), int(version_number[1])
+            except (ValueError, IndexError):
+                self.send_error(400, "Bad request version (%r)" % version)
+                return False
+            if version_number >= (1, 1) and self.protocol_version >= "HTTP/1.1":
+                self.close_connection = 0
+            if version_number >= (2, 0):
+                self.send_error(505,
+                          "Invalid HTTP Version (%s)" % base_version_number)
+                return False
+        elif len(words) == 2:
+            command, path = words
+            self.close_connection = 1
+            if command != 'GET':
+                self.send_error(400,
+                                "Bad HTTP/0.9 request type (%r)" % command)
+                return False
+        elif not words:
+            return False
+        else:
+            self.send_error(400, "Bad request syntax (%r)" % requestline)
+            return False
+        self.command, self.path, self.request_version = command, path, version
+
+        # Examine the headers and look for a Connection directive.
+        self.headers = self.parse_headers(self.rfile)
+
+        conntype = self.headers.get('Connection', "")
+        if conntype.lower() == 'close':
+            self.close_connection = 1
+        elif (conntype.lower() == 'keep-alive' and
+              self.protocol_version >= "HTTP/1.1"):
+            self.close_connection = 0
+        # Examine the headers and look for an Expect directive
+        expect = self.headers.get('Expect', "")
+        if (expect.lower() == "100-continue" and
+                self.protocol_version >= "HTTP/1.1" and
+                self.request_version >= "HTTP/1.1"):
+            if not self.handle_expect_100():
+                return False
+        return True
+
+    def parse_headers(self, header_file):
+        headers = {}
+        while True:
+            line = header_file.readline()
+            if line in (b'\r\n', b'\n', b''):
+                break
+            key, _, value = line.decode('iso-8859-1').partition(':')
+            headers[key] = value
+        return headers
+
+
     def do_GET(self):
         """Return the cached buffer created during initialization"""
         path = self.translate_path(self.path)
@@ -64,7 +151,10 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
         self.send_header("Content-Length", len(file_buffer))
         self.send_header("Last-Modified", self.date_time_string(self.timestamp))
         self.end_headers()
-        self.wfile.write(file_buffer)
+        try:
+            self.wfile.write(file_buffer)
+        except IOError:
+            pass
 
     def log_request(self, code='-', size='-'):
         """Log no information on incoming requests"""

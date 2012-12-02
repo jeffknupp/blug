@@ -12,6 +12,7 @@ import argparse
 import collections
 from lib import blug_server
 from copy import copy
+import threading
 
 POST_SKELETON = """
 title: "{title}"
@@ -246,19 +247,28 @@ def serve(*args, **kwargs):
     """Serve static HTML pages indefinitely"""
     root = kwargs['root']
     os.chdir(root)
-    handler = blug_server.FileCacheRequestHandler
 
     def log_request(self, *args):
         """Do not log any requests while serving"""
         pass
 
-    httpd = blug_server.BlugHttpServer(root, (kwargs['host'],
+    if kwargs['simple']:
+        import http.server
+        handler = http.server.SimpleHTTPRequestHandler
+        handler.log_request = log_request
+        handler.protocol_version = "HTTP/1.0"
+        httpd = http.server.HTTPServer((kwargs['host'],
                                            int(kwargs['port'])), handler)
+
+    else:
+        handler = blug_server.FileCacheRequestHandler
+        httpd = blug_server.BlugHttpServer(root, (kwargs['host'],
+                                            int(kwargs['port'])), handler)
 
     print("serving from {path} on port {port}".format(path=root,
                                                       port=kwargs['port']))
-
     httpd.serve_forever()
+
 
 
 def create_new_post(*args, **kwargs):
@@ -321,6 +331,8 @@ def main():
     serve_parser.add_argument('-r', '--root', action='store', default=os.path.join(
         os.getcwd(), 'generated'),
         help='Root path to serve files from')
+    serve_parser.add_argument('--simple', action='store_true',
+        help='Use SimpleHTTPServer instead of Blug\'s web server')
     serve_parser.set_defaults(func=serve)
 
     arguments = argument_parser.parse_args()
