@@ -5,6 +5,9 @@
     <p class="meta">
     <a class="basic-alignment left" href="{{ post.post_previous.relative_url }}" title="Previous Post: {{ post.post_previous.title }}">&laquo; {{ post.post_previous.title }}</a>
     </p>
+    {% if mail_list %}
+    {% include "mail_signup_form.html" %}
+    {% endif %}
   </footer>
 </article>
 <section>
