@@ -6,7 +6,7 @@ import resource
 import datetime
 import time
 import gzip
-import io
+import socketserver
 
 RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
@@ -121,7 +121,6 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
             headers[key] = value
         return headers
 
-
     def do_GET(self):
         """Return the cached buffer created during initialization"""
         path = self.translate_path(self.path)
@@ -153,6 +152,7 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
         self.end_headers()
         try:
             self.wfile.write(file_buffer)
+            file_buffer.release()
         except IOError:
             pass
 
@@ -161,7 +161,7 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
         pass
 
 
-class BlugHttpServer(server.HTTPServer):
+class BlugHttpServer(socketserver.ThreadingMixIn, server.HTTPServer):
     """An extension to http.server.HTTPServer utilizing the FileCacheRequestHandler"""
 
     def __init__(self, root, *args, **kwargs):
