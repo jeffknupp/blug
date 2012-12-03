@@ -7,6 +7,8 @@ import datetime
 import time
 import gzip
 import socketserver
+import logging
+import logging.handlers
 
 RUSAGE = """0	{}	time in user mode (float)
 {}	time in system mode (float)
@@ -28,6 +30,11 @@ RUSAGE = """0	{}	time in user mode (float)
 EOL1 = b'\r\n'
 EOL2 = b'\n\n'
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+file_logger = logging.handlers.RotatingFileHandler('blug.log', maxBytes=100000000, backupCount=5)
+file_logger.setLevel(logging.INFO)
+logger.addHandler(file_logger)
 
 class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
     """Request handler that serves cached versions of static files"""
@@ -118,7 +125,8 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
             if line in (b'\r\n', b'\n', b''):
                 break
             key, _, value = line.decode('iso-8859-1').partition(':')
-            headers[key] = value
+            headers[key] = value.strip()
+        logger.info('{} {}'.format(self.address_string(), headers))
         return headers
 
     def do_GET(self):
@@ -157,7 +165,6 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
             pass
 
     def log_request(self, code='-', size='-'):
-        """Log no information on incoming requests"""
         pass
 
 
