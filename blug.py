@@ -14,19 +14,23 @@ from lib import blug_server
 from copy import copy
 import threading
 
-POST_SKELETON = """
-title: "{title}"
+POST_SKELETON = """title: {title}
 date: {date}
 categories:
 """
 
 
-def generate_post_file_name(title, date):
+def generate_post_file_name(title):
     """Return the path a post should use based on its title and date"""
-    post_file_date = datetime.datetime.strftime(date, '%Y/%m/%d/')
-    title = ''.join(char for char in title.lower() if (
-        char.isalnum() or char == ' '))
-    return post_file_date + title.replace(' ', '-')
+    return ''.join(char for char in title.lower() if ( char.isalnum() or char == ' ')).replace(' ', '-')
+
+
+def generate_post_file_path(title, date):
+    return os.path.join(
+        datetime.datetime.strftime(date, '%Y/%m/%d/'),
+        generate_post_file_name(title))
+
+
 
 
 def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
@@ -69,8 +73,9 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         # www.widgetfactory.com/marketing/blog/, we would generate the
         # files in the /blog sub-directory but the links would need to
         # include /marketing/blog
-        post['relative_path'] = generate_post_file_name(post['title'],
-                                                        post['date'])
+        post['relative_path'] = generate_post_file_path(post['title'],
+                post['date'])
+
         if blog_prefix:
             post['relative_path'] = os.path.join(
                 blog_prefix, post['relative_path'])
@@ -229,18 +234,20 @@ def copy_static_content(output_dir, root_dir):
 
 def create_post(title, content_dir):
     """Create an empty post with the YAML front matter generated"""
-    post_file_name = generate_post_file_name(title, datetime.datetime.now())
-    post_file_path = os.path.join(content_dir, post_file_name.replace('/', '-')) + '.md'
-
-    post_date = datetime.datetime.strftime(
+    post_date_time = datetime.datetime.strftime(
         datetime.datetime.now(), '%Y-%m-%d %H:%M')
+    post_date = datetime.datetime.strftime(
+        datetime.datetime.now(), '%Y-%m-%d')
+    post_file_name = post_date + '-' + generate_post_file_name(title) + '.md'
+    post_file_path = os.path.join(content_dir, post_file_name)
 
-    if os.path.exists(os.path.join(content_dir, post_file_path)):
+
+    if os.path.exists(post_file_path):
         raise EnvironmentError('[{post}] already exists.'.format(
             post=post_file_path))
 
     with open(post_file_path, 'w') as post_file:
-        post_file.write(POST_SKELETON.format(date=post_date, title=title))
+        post_file.write(POST_SKELETON.format(date=post_date_time, title=title))
 
 
 def serve(*args, **kwargs):
