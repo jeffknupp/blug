@@ -53,6 +53,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
             'fenced_code',
             'codehilite(force_linenos=True)',
             'tables',
+            'footnotes',
             'meta',
         ])
         generated_html = md.convert(post_file_buffer)
