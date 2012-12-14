@@ -144,7 +144,7 @@ def generate_static_files(site_config, posts, categories, template_environment):
     # Generate main 'index.html' and '/blog/index.html' pages,
     # showing the five most recent posts
     template_variables = copy(site_config)
-    template_variables['next_page'] = 2
+    template_variables['next_page'] = 1
     template_variables['current_posts'] = posts[:5]
     generate_static_page(template_variables,
                          site_config['output_dir'], list_template)
@@ -181,7 +181,7 @@ def generate_pagination_pages(site_config, all_posts, template):
     template_variables = copy(site_config)
     num_posts = len(all_posts)
     for index, page in enumerate([all_posts[index:index + 5] for index in range(5, num_posts, 5)]):
-        # overcome the fact that enumerate is 0-indexed
+        # Overcome the fact that enumerate is 0-indexed
         current_page = index + 1
         # Since we're reusing the index.html template, make it think
         # these posts are the only ones
@@ -190,7 +190,7 @@ def generate_pagination_pages(site_config, all_posts, template):
 
         # if we've reached the "last" page, don't present a link to older
         # content
-        if current_page * 5 >= num_posts:
+        if (current_page * 5) >= num_posts - 5:
             template_variables['next_page'] = None
 
         output_dir = os.path.join(site_config['blog_dir'],
