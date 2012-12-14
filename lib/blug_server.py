@@ -32,9 +32,12 @@ EOL2 = b'\n\n'
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s:%(funcName)s - %(message)s')
 file_logger = logging.handlers.RotatingFileHandler('blug.log', maxBytes=100000000, backupCount=5)
 file_logger.setLevel(logging.INFO)
+file_logger.setFormatter(formatter)
 logger.addHandler(file_logger)
+
 
 class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
     """Request handler that serves cached versions of static files"""
@@ -67,7 +70,6 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
                 return False
         elif len(words) == 2:
             command, path = words
-            self.close_connection = 1
             if command != 'GET':
                 self.send_error(400,
                                 "Bad HTTP/0.9 request type (%r)" % command)
@@ -92,7 +94,6 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
                 break
             key, _, value = line.decode('iso-8859-1').partition(':')
             headers[key] = value.strip()
-        logger.info('{} {}'.format(self.address_string(), headers))
         return headers
 
     def do_GET(self):
@@ -127,7 +128,7 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
             pass
 
     def log_request(self, code='-', size='-'):
-        pass
+        logger.info('{} - {}'.format(self.address_string(), self.headers))
 
 
 class BlugHttpServer(socketserver.ThreadingMixIn, server.HTTPServer):
@@ -190,20 +191,22 @@ class FileCache():
 
 def print_usage_stats(rusage_struct):
     """Display resource usage statistics for the file cache"""
-    return  RUSAGE.format(rusage_struct.ru_utime, rusage_struct.ru_stime,
-        rusage_struct.ru_maxrss, rusage_struct.ru_ixrss, rusage_struct.ru_idrss,
-        rusage_struct.ru_isrss, rusage_struct.ru_minflt, rusage_struct.ru_majflt,
-        rusage_struct.ru_nswap, rusage_struct.ru_inblock, rusage_struct.ru_oublock,
-        rusage_struct.ru_msgsnd, rusage_struct.ru_msgrcv,
-        rusage_struct.ru_nsignals, rusage_struct.ru_nvcsw,
-        rusage_struct.ru_nivcsw)
-
-def start_server():
-    """Start the HTTP server"""
-    httpd = BlugHttpServer('/home/jeff/code/my_git_repos/blug/', ('localhost', 8082),
-            FileCacheRequestHandler)
-    while True:
-        httpd.handle_request()
+    return  RUSAGE.format(rusage_struct.ru_utime,
+                          rusage_struct.ru_stime,
+                          rusage_struct.ru_maxrss,
+                          rusage_struct.ru_ixrss,
+                          rusage_struct.ru_idrss,
+                          rusage_struct.ru_isrss,
+                          rusage_struct.ru_minflt,
+                          rusage_struct.ru_majflt,
+                          rusage_struct.ru_nswap,
+                          rusage_struct.ru_inblock,
+                          rusage_struct.ru_oublock,
+                          rusage_struct.ru_msgsnd,
+                          rusage_struct.ru_msgrcv,
+                          rusage_struct.ru_nsignals,
+                          rusage_struct.ru_nvcsw,
+                          rusage_struct.ru_nivcsw)
 
 if __name__ == '__main__':
     cache = FileCache('/home/jeff/code/my_git_repos/blug/generated/', 1)
