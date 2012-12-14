@@ -65,27 +65,6 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
             if version[:5] != 'HTTP/':
                 self.send_error(400, "Bad request version (%r)" % version)
                 return False
-            try:
-                base_version_number = version.split('/', 1)[1]
-                version_number = base_version_number.split(".")
-                # RFC 2145 section 3.1 says there can be only one "." and
-                #   - major and minor numbers MUST be treated as
-                #      separate integers;
-                #   - HTTP/2.4 is a lower version than HTTP/2.13, which in
-                #      turn is lower than HTTP/12.3;
-                #   - Leading zeros MUST be ignored by recipients.
-                if len(version_number) != 2:
-                    raise ValueError
-                version_number = int(version_number[0]), int(version_number[1])
-            except (ValueError, IndexError):
-                self.send_error(400, "Bad request version (%r)" % version)
-                return False
-            if version_number >= (1, 1) and self.protocol_version >= "HTTP/1.1":
-                self.close_connection = 0
-            if version_number >= (2, 0):
-                self.send_error(505,
-                          "Invalid HTTP Version (%s)" % base_version_number)
-                return False
         elif len(words) == 2:
             command, path = words
             self.close_connection = 1
@@ -103,19 +82,6 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
         # Examine the headers and look for a Connection directive.
         self.headers = self.parse_headers(self.rfile)
 
-        conntype = self.headers.get('Connection', "")
-        if conntype.lower() == 'close':
-            self.close_connection = 1
-        elif (conntype.lower() == 'keep-alive' and
-              self.protocol_version >= "HTTP/1.1"):
-            self.close_connection = 0
-        # Examine the headers and look for an Expect directive
-        expect = self.headers.get('Expect', "")
-        if (expect.lower() == "100-continue" and
-                self.protocol_version >= "HTTP/1.1" and
-                self.request_version >= "HTTP/1.1"):
-            if not self.handle_expect_100():
-                return False
         return True
 
     def parse_headers(self, header_file):
@@ -139,21 +105,17 @@ class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
         self.path = self.path.split('?', 1)[0]
         self.path = self.path.split('#', 1)[0]
         cType = self.guess_type(self.path)
-        accept_encoding =  self.headers.get('Accept-Encoding', '')
-        if 'gzip' in accept_encoding:
-            file_buffer = self.server.file_cache.get_resource(self.path, zipped=True)
-        else:
-            file_buffer = self.server.file_cache.get_resource(self.path)
+        use_gzip = 'gzip' in self.headers.get('Accept-Encoding', '')
+        file_buffer = self.server.file_cache.get_resource(self.path, zipped=use_gzip)
         if not file_buffer:
             self.send_error(404, "File not found")
             return None
 
-        #TODO: Cache header along with file and send directly
         self.send_response(200)
         self.send_header("Content-type", cType + '; charset=UTF-8')
         if cType != 'text/html':
             self.send_header('Expires', self.expire_time)
-        if 'gzip' in accept_encoding:
+        if use_gzip:
             self.send_header('Content-Encoding', 'gzip')
         self.send_header("Content-Length", len(file_buffer))
         self.send_header("Last-Modified", self.date_time_string(self.timestamp))
