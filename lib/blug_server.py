@@ -42,6 +42,7 @@ logger.addHandler(file_logger)
 class FileCacheRequestHandler(server.SimpleHTTPRequestHandler):
     """Request handler that serves cached versions of static files"""
 
+    server_version = 'Blug/1.0'
     expire_time = datetime.datetime.now() + datetime.timedelta(days=365)
     timestamp = time.time()
 
