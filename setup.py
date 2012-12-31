@@ -1,9 +1,8 @@
-from distutils.core import setup
-import distutils.command.install_scripts
+from setuptools import setup
 
 setup(
     name = 'blug',
-    version = '0.2.0',
+    version = '0.3.0',
     description = 'Static site generator for Markdown based blogs, with a built-in webserver',
     author = 'Jeff Knupp',
     author_email = 'jeff@jeffknupp.com',
@@ -11,12 +10,14 @@ setup(
     keywords = ['blog', 'markdown', 'static', 'website', 'generator'],
     packages = ['lib', 'test'],
     scripts = ['blug.py'],
-    requires = ['Jinja2 (>=2.6)', 'Markdown (>=2.2.0)', 'PyYAML (>=3.10)'],
+    requires = ['Jinja2 (>=2.6)', 'Markdown (>=2.2.0)', 'PyYAML (>=3.10)', 'Pygments(>=1.5)'],
+    entry_points = {'console_scripts': ['blug = blug.main'] }
+    include_package_data = True,
     license = 'MIT License',
     classifiers = [
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Natural Language :: English',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
