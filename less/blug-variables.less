@@ -15,6 +15,12 @@ nav ul li { margin-top: 20px; }
     border-left: 1px solid; 
 }
 
+.entry-content p, h1, h2, h3, h4, h5, h6 {
+    width: 80%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 #footer {
     border-top: 1px solid;
     background-color: @grayLighter;
@@ -31,6 +37,8 @@ nav ul li { margin-top: 20px; }
 
 .codehilitetable {
     table-layout: fixed;
+    margin-top: 20px;
+    margin-bottom: 20px;
     width: 100%;
     .linenos {
         width: 3em;
@@ -38,11 +46,21 @@ nav ul li { margin-top: 20px; }
     .codehilite {
         overflow: auto;
     }
-    pre {
-        line-height: @baseLineHeight;
-        font-family: @sansFontFamily;
-        padding-left: 1em;
-    }
+    
 }
 
-body { font-family: 'Source Sans Pro', sans-serif; }
+pre {
+        line-height: @baseLineHeight;
+        font-family: @monoFontFamily;
+        font-size: 14px;
+        padding-left: 1em;
+    }
+
+body { 
+    code {
+        background-color: #f0f0f0;
+        font-family: @monoFontFamily;
+        font-size: 14px;
+    }
+    font-family: @sansFontFamily;
+}

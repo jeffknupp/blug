@@ -5862,6 +5862,8 @@ nav ul li {
 
 .codehilitetable {
   width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
   table-layout: fixed;
 }
 

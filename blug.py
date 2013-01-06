@@ -51,7 +51,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         # and the post proper
         md = markdown.Markdown(extensions=[
             'fenced_code',
-            'codehilite(force_linenos=True)',
+            'codehilite',
             'tables',
             'footnotes',
             'meta',
