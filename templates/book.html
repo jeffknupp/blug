@@ -3,6 +3,25 @@
 {% block description %}An eBook dedicated to learning to write idiomatic Python code{% endblock %}
 {% block fullbody %}
  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+ <style type="text/css">
       body {
           font-size: 14px;
         padding-top: 20px;
@@ -77,18 +96,42 @@
                 written, automatically</b></p>
             </div>
         <div class="span6">
+            <h4>Here's a peek inside the book...</h4>
+            <div>
+<h5 id="use-the-enumerate-function-in-loops-instead-of-creating-an-index-variable"><a href="#TOC"><span class="header-section-number">1.1.1</span> Use the  <code>enumerate</code> function in loops instead of creating an &#8220;index&#8221; variable</a></h5>
+<p>Programmers coming from other languages are used to explicitly declaring a variable to track the index of a container in a loop. For example, in C++:</p>
+<pre class="sourceCode cpp"><code class="sourceCode cpp">    <span class="kw">for</span> (<span class="dt">int</span> i=<span class="dv">0</span>; i &lt; container.size(); ++i)
+    {
+        <span class="co">// Do stuff</span>
+    }</code></pre>
+<p>In Python, the  <code>enumerate</code> built-in function handles this role.</p>
+<h6 id="harmful"><a href="#TOC"><span class="header-section-number">1.1.1.1</span> Harmful</a></h6>
+<pre class="sourceCode python"><code class="sourceCode python">    my_container = [<span class="st">&#39;Larry&#39;</span>, <span class="st">&#39;Moe&#39;</span>, <span class="st">&#39;Curly&#39;</span>]
+    index = <span class="dv">0</span>
+    <span class="kw">for</span> element in my_container:
+        <span class="kw">print</span> (<span class="st">&#39;{} {}&#39;</span>.<span class="dt">format</span>(index, element))
+        index += <span class="dv">1</span></code></pre>
+<h6 id="idiomatic"><a href="#TOC"><span class="header-section-number">1.1.1.2</span> Idiomatic</a></h6>
+<pre class="sourceCode python"><code class="sourceCode python">    my_container = [<span class="st">&#39;Larry&#39;</span>, <span class="st">&#39;Moe&#39;</span>, <span class="st">&#39;Curly&#39;</span>]
+    <span class="kw">for</span> index, element in <span class="dt">enumerate</span>(my_container):
+        <span class="kw">print</span> (<span class="st">&#39;{} {}&#39;</span>.<span class="dt">format</span>(index, element))</code></pre>
+<p></p>
+</div>
+        </div>
+    </div>
+        <div class="row">
+            <div class="span8 offset2">
+            <h4>Choose the version that's right for you</h4>
             <p><em>Writing Idiomatic Python</em> comes in two versions: one for Python
             2.7.3+ and one for Python 3.3+. Each has a number of idioms unique to their
             Python version.</p>
-            <h4>Choose the version that's right for you</h4>
-            <p>Buy the pre-order PDF for <b>Python 2.7.3+</b> at the special price
-                of $8.99</p>
-                <a class="btn btn-success buy">Buy <em>Writing Idiomatic Python</em> for Python 2.7.3+<br>$8.99</br></a>
-            <p>Buy the pre-order PDF for <b>Python 3.3+</b> at the special price
-                of $8.99</p>
-                <a class="btn btn-success buy">Buy <em>Writing Idiomatic Python</em> for Python 3.3+<br>$8.99</br></a>
-            <p>Buy the pre-order PDF for <b>both versions</b> at the special price of $12.99</p>
-            <a class="btn btn-success buy">Buy <em>Writing Idiomatic Python</em> for both versions<br>$12.99</br></a>
+            <p><b>Python 2.7.3+</b></p>
+                <a class="btn btn-success buy">Buy the eBook for Python 2.7.3+ for $8.99 (preorder price)</a>
+            <p><b>Python 3.3+</b></p>
+                <a class="btn btn-success buy">Buy the eBook for Python 3.3+ for $8.99 (preorder price)</a>
+            <p><b>Both Versions</b></p>
+            <a class="btn btn-success buy">Buy both eBook versions for $12.99 (preorder price)</a>
+            </div>
         </div>
     </div>
 <div class="span12">
