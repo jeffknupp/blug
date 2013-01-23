@@ -140,6 +140,7 @@ def generate_static_files(site_config, posts, categories, template_environment):
     archives_template = template_environment.get_template('archives.html')
     atom_template = template_environment.get_template('atom.xml')
     about_template = template_environment.get_template('about.html')
+    book_template = template_environment.get_template('book.html')
 
     # Generate main 'index.html' and '/blog/index.html' pages,
     # showing the five most recent posts
@@ -156,6 +157,11 @@ def generate_static_files(site_config, posts, categories, template_environment):
     generate_static_page(template_variables,
                          os.path.join(site_config['blog_dir'],
                          'archives'), archives_template)
+
+    # Generate "Book" page
+    generate_static_page(template_variables,
+                         os.path.join(site_config['output_dir'],
+                         'writing-idiomatic-python-ebook'), book_template)
 
     # Generate "About Me" page
     generate_static_page(template_variables,
