@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Writing Idiomatic Python Book{% endblock %}
+{% block description %}An eBook dedicated to learning to write idiomatic Python code{% endblock %}
+{% block fullbody %}
+ <style type="text/css">
+      body {
+          font-size: 14px;
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 30px 30px;
+        text-align: center;
+      }
+      .jumbotron > h1 {
+        font-size: 36px;
+        line-height: 1;
+        width: 100%;
+      }
+      .jumbotron > h4 {
+        font-size: 18px;
+        line-height: 1;
+        width: 100%;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+      #buy {
+          padding: 14px 24px;
+          margin-bottom: 14px;
+      }
+    </style>
+    <div class="container">
+    <div class="masthead">
+        <h3>Writing Idiomatic Python</h3>
+    </div>
+        <div class="row">
+        <div class="span8 offset2">
+        <hr>
+        <div class="jumbotron">
+            <h1>Idiomatic Python Code is What Separates Novices From Experts</h1>
+            <h4>Luckily, learning how to write it just got a whole lot easier...</h4>
+        </div>
+    <p>The <em>Writing Idiomatic Python</em> book is finally here! Chock full of
+    code samples, you'll learn the "Pythonic" way to accomplish common tasks.
+    Each idiom comes with a detailed description, example code showing the
+    "wrong" way to do it, and code for the idiomatic, "Pythonic"
+    alternative.</p>
+    <hr>
+</div>
+<div class="row">
+    <div class = "span3 offset2">
+    <p>Are you:</p>
+    <ul>
+        <li>Coming to Python from another programming language?</li>
+        <li>Learning Python as a first programming language?</li>
+        <li>Looking to increase the readabilty, maintainability, and correctness
+        of your Python code?</li>
+    </ul>
+    <p>If so, you'll find <em>Writing Idiomatic Python</em> a valuable tool. If
+    you don't, <b>I'll refund you the full price of the book (which is still yours
+        to keep)</b>. Why offer a money back guarantee on a book? Because I know <em>I</em> like
+    having that extra level of comfort, and I'm guessing you do too. The book is
+    still in the "beta" stage, with corrections and new content added frequently. If you preorder now
+    (at the lower, preorder price), <b>you'll get every update as soon as it's
+        written, automatically</b></p>
+</div>
+<div class="span4">
+    <p><em>Writing Idiomatic Python</em> comes in two versions: one for Python
+    2.7.3+ and one for Python 3.3+. Each has a number of idioms unique to their
+    Python version.</p>
+    <h4>Choose the version that's right for you</h4>
+    <a class="btn btn-success buy">Buy the pre-order copy (PDF) for <b>Python 2.7.3+</b> at the special price
+        of $8.99</a>
+    <a class="btn btn-success buy">Buy the pre-order copy (PDF) for <b>Python 3.3+</b> at the special price
+        of $8.99</a>
+    <a class="btn btn-success buy">Buy your pre-order copy (PDF) of
+        <b>both versions</b> at the special price of $12.99</a>
+</div>
+</div>
+<div class="span12">
+    <div id="footer">
+        {% block footer %}
+            <footer role="contentinfo"><p>
+            Copyright &copy; 2013 - {{ author }}-
+            </p>
+            </footer>
+        {% endblock %} 
+    </div>
+</div>
+</div>
+</div>
+</div>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId={{ facebook_appid }}&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+{% endblock %}
