@@ -160,7 +160,7 @@ textarea {
 
 body {
   margin: 0;
-  font-family: "Source Sans Pro", sans;
+  font-family: "Open Sans", sans-serif;
   font-size: 16px;
   line-height: 24px;
   color: #333333;
@@ -910,7 +910,7 @@ input,
 button,
 select,
 textarea {
-  font-family: "Source Sans Pro", sans;
+  font-family: "Open Sans", sans-serif;
 }
 
 label {
@@ -4266,7 +4266,7 @@ input[type="submit"].btn.btn-mini {
 .navbar-search .search-query {
   padding: 4px 14px;
   margin-bottom: 0;
-  font-family: "Source Sans Pro", sans;
+  font-family: "Open Sans", sans-serif;
   font-size: 13px;
   font-weight: normal;
   line-height: 1;
@@ -5841,6 +5841,18 @@ nav ul li {
   border-left: 1px solid;
 }
 
+.entry-content p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  width: 80%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 #footer {
   padding-right: 1em;
   padding-left: 1em;
@@ -5862,6 +5874,8 @@ nav ul li {
 
 .codehilitetable {
   width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
   table-layout: fixed;
 }
 
@@ -5873,14 +5887,21 @@ nav ul li {
   overflow: auto;
 }
 
-.codehilitetable pre {
+pre {
   padding-left: 1em;
-  font-family: "Source Sans Pro", sans;
+  font-family: "Source Code Pro", monospace;
+  font-size: 14px;
   line-height: 24px;
 }
 
 body {
-  font-family: 'Source Sans Pro', sans-serif;
+  font-family: "Open Sans", sans-serif;
+}
+
+body code {
+  font-family: "Source Code Pro", monospace;
+  font-size: 14px;
+  background-color: #f0f0f0;
 }
 
 .pull-right {
