@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-"""Static blog generator"""
+"""Blug is a static blog generator for Markdown based blogs"""
 
 import jinja2
 import sys
@@ -10,9 +10,8 @@ import datetime
 import shutil
 import argparse
 import collections
-from lib import blug_server
+import blug_server
 from copy import copy
-import threading
 
 POST_SKELETON = """title: {title}
 date: {date}
@@ -21,16 +20,15 @@ categories:
 
 
 def generate_post_file_name(title):
-    """Return the path a post should use based on its title and date"""
-    return ''.join(char for char in title.lower() if ( char.isalnum() or char == ' ')).replace(' ', '-')
+    """Return the file name a post should use based on its title and date"""
+    return ''.join(char for char in title.lower() if (char.isalnum() or char == ' ')).replace(' ', '-')
 
 
 def generate_post_file_path(title, date):
+    """Return the relative path to a post based on its title and date"""
     return os.path.join(
         datetime.datetime.strftime(date, '%Y/%m/%d/'),
         generate_post_file_name(title))
-
-
 
 
 def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
@@ -75,7 +73,7 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
         # files in the /blog sub-directory but the links would need to
         # include /marketing/blog
         post['relative_path'] = generate_post_file_path(post['title'],
-                post['date'])
+                                                        post['date'])
 
         if blog_prefix:
             post['relative_path'] = os.path.join(
@@ -240,14 +238,13 @@ def copy_static_content(output_dir, root_dir):
 
 
 def create_post(title, content_dir):
-    """Create an empty post with the YAML front matter generated"""
+    """Create an empty post with the appropriate Markdown metadata format"""
     post_date_time = datetime.datetime.strftime(
         datetime.datetime.now(), '%Y-%m-%d %H:%M')
     post_date = datetime.datetime.strftime(
         datetime.datetime.now(), '%Y-%m-%d')
     post_file_name = post_date + '-' + generate_post_file_name(title) + '.md'
     post_file_path = os.path.join(content_dir, post_file_name)
-
 
     if os.path.exists(post_file_path):
         raise EnvironmentError('[{post}] already exists.'.format(
@@ -272,21 +269,21 @@ def serve(*args, **kwargs):
         handler.log_request = log_request
         handler.protocol_version = "HTTP/1.0"
         httpd = http.server.HTTPServer((kwargs['host'],
-                                           int(kwargs['port'])), handler)
+                                        int(kwargs['port'])), handler)
 
     else:
         handler = blug_server.FileCacheRequestHandler
         httpd = blug_server.BlugHttpServer(root, (kwargs['host'],
-                                            int(kwargs['port'])), handler)
+                                           int(kwargs['port'])), handler)
 
     print("serving from {path} on port {port}".format(path=root,
                                                       port=kwargs['port']))
     httpd.serve_forever()
 
 
-
 def create_new_post(*args, **kwargs):
-    """Creates a new blog post file with the correct path and YAML front matter filled in"""
+    """Reads the appropriate configuration file and generates a new, empty post with
+    the correct file name"""
     config_file = 'config.yml'
     if os.path.exists('config.local.yml'):
         config_file = 'config.local.yml'
@@ -310,7 +307,6 @@ def generate_site(*args, **kwargs):
     generate_all_files(site_config)
 
     return True
-
 
 def main():
     """Main execution of blug"""
@@ -346,7 +342,7 @@ def main():
         os.getcwd(), 'generated'),
         help='Root path to serve files from')
     serve_parser.add_argument('--simple', action='store_true',
-        help='Use SimpleHTTPServer instead of Blug\'s web server')
+                              help='Use SimpleHTTPServer instead of Blug\'s web server')
     serve_parser.set_defaults(func=serve)
 
     arguments = argument_parser.parse_args()
