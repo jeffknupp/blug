@@ -16,6 +16,8 @@
   <link href='/css/style.css' rel='stylesheet' type='text/css'>
   <link rel="alternate" href="http://feeds.feedburner.com/hackersgonnahack" title="Hackers Gonna Hack" type="application/atom+xml">
   <link href="http://cdn-images.mailchimp.com/embedcode/classic-081711.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  <script type="text/javascript" src="/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="https://gumroad.com/js/gumroad.js"></script>
   <script type="text/javascript">
     var _gaq = _gaq || [];
@@ -78,7 +80,18 @@ code > span.er { color: #ff0000; font-weight: bold; }
         font-size: 21px;
         padding: 14px 24px;
       }
+        a > img {
+            padding-bottom: 10px;
+        }
 
+        .modal-body h4, p {
+            text-align: center;
+        }
+        .modal-body img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
        h1, h2, h3, h4, h5, h6 {
         width: 100%;
         }
@@ -147,9 +160,9 @@ code > span.er { color: #ff0000; font-weight: bold; }
             2.7.3+ and one for Python 3.3+. Each has a number of idioms unique to their
             Python version.</p>
             <p><b>Python 2.7.3+</b></p>
-                <a class="btn btn-success" href="http://gum.co/DLgC" onclick="_gaq.push(['_trackEvent', 'goals', 'pdf', '2', 2]);">Buy the eBook for Python 2.7.3+ for $8.99 (preorder price)</a>
+                <a class="btn btn-success"  data-toggle="modal" data-target="#python2modal">Buy the eBook for Python 2.7.3+ for $8.99 (preorder price)</a>
             <p><b>Python 3.3+</b></p>
-                <a class="btn btn-success" href="http://gum.co/Ejqf" onclick="_gaq.push(['_trackEvent', 'goals', 'pdf', '3', 3]);">Buy the eBook for Python 3.3+ for $8.99 (preorder price)</a>
+                <a class="btn btn-success" data-toggle="modal" data-target="#python3modal">Buy the eBook for Python 3.3+ for $8.99 (preorder price)</a>
             </div>
             </div>
         </div>
@@ -349,5 +362,33 @@ code > span.er { color: #ff0000; font-weight: bold; }
     </div>
 </div>
 </div>
-
+<div id="python3modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Buy the Writing Idiomatic Python PDF for Python 3.3+</h3>
+  </div>
+  <div class="modal-body">
+    <h4>Choose your payment method</h4>
+    <ul class="unstyled">
+        <p>VISA, Mastercard, AMEX, Discover, JCB or Diners Club</p><a href="http://gum.co/Ejqf"><img src="/images/ccs.png" height="25" width="175"/></a>
+        <hr>
+        <p>Google Wallet</p><a href="https://www.e-junkie.com/ecom/gb.php?i=1201431&c=gc&cl=238678&ejc=4"><img src="https://checkout.google.com/buttons/checkout.gif?merchant_id=666428885640583&w=160&h=43&style=trans&variant=text&loc=en_US" border="0" alt="Buy Now"/></a>
+        <hr>
+        <p>PayPal</p><a href="https://www.e-junkie.com/ecom/gb.php?i=1201431&c=single&cl=238678" target="ejejcsingle"><img src="/images/EC-button.gif" border="0" alt="Buy Now"/></a>
+  </div>
+</div>
+<div id="python2modal" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Buy the Writing Idiomatic Python PDF For Python 2.7.3+</h3>
+  </div>
+  <div class="modal-body">
+    <h4>Choose your payment method</h4>
+        <p>VISA, Mastercard, AMEX, Discover, JCB or Diners Club</p><a href="http://gum.co/DLgC"><img src="/images/ccs.png" height="25" width="175" /></a>
+        <hr>
+        <p>Google Wallet</p><a href="https://www.e-junkie.com/ecom/gb.php?i=1201405&c=gc&cl=238678&ejc=4"><img src="https://checkout.google.com/buttons/checkout.gif?merchant_id=666428885640583&w=160&h=43&style=trans&variant=text&loc=en_US" border="0" alt="Buy Now"/></a>
+        <hr>
+        <p>PayPal</p><a href="https://www.e-junkie.com/ecom/gb.php?i=1201405&c=single&cl=238678" target="ejejcsingle"><img src="/images/EC-button.gif" border="0" alt="Buy Now"/></a>
+  </div>
+</div>
 </body>

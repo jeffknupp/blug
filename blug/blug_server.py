@@ -143,7 +143,7 @@ class BlugHttpServer(socketserver.ThreadingMixIn, server.HTTPServer):
 class FileCache():
     """An in-memory cache of static files"""
 
-    FILE_TYPES = ['.html', '.js', '.css', '.png', '.xml']
+    FILE_TYPES = ['.html', '.js', '.gif', '.css', '.png', '.xml']
 
     def __init__(self, base, debug=0):
         self.base = os.path.normpath(base)
