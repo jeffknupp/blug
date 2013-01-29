@@ -5828,6 +5828,15 @@ nav ul li {
   margin-top: 20px;
 }
 
+.book-banner {
+  width: 500px;
+  margin: 0 auto;
+}
+
+.book-banner a {
+  text-decoration: underline;
+}
+
 .banner header h1 {
   font-size: 28px;
 }
