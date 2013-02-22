@@ -5,13 +5,16 @@ import jinja2
 import sys
 import markdown
 import os
-import yaml
 import datetime
 import shutil
 import argparse
 import collections
 import blug_server
 from copy import copy
+try:
+    import config_local as config
+except ImportError:
+    import config
 
 POST_SKELETON = """title: {title}
 date: {date}
@@ -125,7 +128,9 @@ def generate_static_page(template_variables, output_dir, template,
                          filename='index.html'):
     """Generate a static page"""
     create_path_to_file(output_dir)
-    with open(os.path.join(output_dir, filename), 'w', encoding='ascii') as output_file:
+    with open(
+        os.path.join(
+            output_dir, filename), 'w', encoding='ascii') as output_file:
         output_file.write(template.render(template_variables))
 
 
@@ -137,8 +142,17 @@ def generate_static_files(site_config, posts, categories, template_environment):
     list_template = template_environment.get_template('list.html')
     archives_template = template_environment.get_template('archives.html')
     atom_template = template_environment.get_template('atom.xml')
-    about_template = template_environment.get_template('about.html')
-    book_template = template_environment.get_template('book.html')
+
+    if 'additional_pages' in site_config:
+        for entry_name in site_config['additional_pages']:
+            entry = site_config['additional_pages'][entry_name]
+            template_path = entry['template']
+            try:
+                path = os.path.join(site_config['output_dir'], entry['path'])
+            except KeyError:
+                path = os.path.join(site_config['output_dir'], entry_name)
+            template = template_environment.get_template(template_path)
+            generate_static_page(site_config, path, template)
 
     # Generate main 'index.html' and '/blog/index.html' pages,
     # showing the five most recent posts
@@ -156,16 +170,6 @@ def generate_static_files(site_config, posts, categories, template_environment):
                          os.path.join(site_config['blog_dir'],
                          'archives'), archives_template)
 
-    # Generate "Book" page
-    generate_static_page(template_variables,
-                         os.path.join(site_config['output_dir'],
-                         'writing-idiomatic-python-ebook'), book_template)
-
-    # Generate "About Me" page
-    generate_static_page(template_variables,
-                         os.path.join(site_config['output_dir'],
-                         'about-me'), about_template)
-
     # Generate atom.xml feed
     template_variables['now'] = datetime.datetime.now().isoformat()
     generate_static_page(template_variables, site_config['output_dir'],
@@ -174,17 +178,20 @@ def generate_static_files(site_config, posts, categories, template_environment):
     # Generate a category "archive" page listing the posts in each category
     for category, posts in categories.items():
         template_variables['all_posts'] = posts
-        generate_static_page(template_variables, os.path.join(site_config['blog_dir'],
-                             'categories', category), archives_template)
-        generate_static_page(template_variables, os.path.join(site_config['blog_dir'],
-                             'categories', category), atom_template, 'atom.xml')
+        generate_static_page(template_variables, os.path.join(
+            site_config['blog_dir'],
+           'categories', category), archives_template)
+        generate_static_page(template_variables, os.path.join(
+            site_config['blog_dir'],
+            'categories', category), atom_template, 'atom.xml')
 
 
 def generate_pagination_pages(site_config, all_posts, template):
     """Generate the additional index.html files required for pagination"""
     template_variables = copy(site_config)
     num_posts = len(all_posts)
-    for index, page in enumerate([all_posts[index:index + 5] for index in range(5, num_posts, 5)]):
+    for index, page in enumerate(
+            [all_posts[index:index + 5] for index in range(5, num_posts, 5)]):
         # Overcome the fact that enumerate is 0-indexed
         current_page = index + 1
         # Since we're reusing the index.html template, make it think
@@ -284,21 +291,13 @@ def serve(*args, **kwargs):
 def create_new_post(*args, **kwargs):
     """Reads the appropriate configuration file and generates a new, empty post with
     the correct file name"""
-    config_file = 'config.yml'
-    if os.path.exists('config.local.yml'):
-        config_file = 'config.local.yml'
-    with open(config_file) as config_file_handle:
-        site_config = yaml.load(config_file_handle.read())
-        create_post(kwargs['title'], site_config['content_dir'])
+    site_config = config.CONFIG
+    create_post(kwargs['title'], site_config['content_dir'])
 
 
 def generate_site(*args, **kwargs):
     """Generate the static HTML pages based on the YAML configuration file and content directory"""
-    config_file = 'config.yml'
-    if os.path.exists('config.local.yml'):
-        config_file = 'config.local.yml'
-    with open(config_file) as config_file_handle:
-        site_config = yaml.load(config_file_handle.read())
+    site_config = config.CONFIG
 
     site_config['blog_dir'] = os.path.join(site_config['output_dir'], site_config['blog_prefix'])
     print ('Generating...')

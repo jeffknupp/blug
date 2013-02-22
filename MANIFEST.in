@@ -1,4 +1,5 @@
 recursive-include static *
 recursive-include templates *
+recursive-include less *
 include config.yml
 include requirements.txt
