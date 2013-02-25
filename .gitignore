@@ -3,7 +3,7 @@ generated/*
 content/*
 .idea
 .*swp
-
+*.un~
 *.py[co]
 
 # Packages
