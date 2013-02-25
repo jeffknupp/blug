@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ post.title }}{% endblock %}
+{% block canonical %}{{ post.canonical_url }}{% endblock canonical %}
 {% block content %}
 {% include "post.html" %}
 {% endblock %}

@@ -1,6 +1,14 @@
       <div class="sharing">
           <a href="http://twitter.com/share" class="twitter-share-button" data-url="{{ post.canonical_url }}" data-via="{{ twitter_user }}" data-counturl="{{ post.canonical_url }}" >Tweet</a>
     <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+    <div class="g-plusone" data-annotation="inline" data-width="300"></div>
+    <script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+    </script>
 </div>
     <p class="meta">
     <a class="basic-alignment left" href="{{ post.post_previous.relative_url }}" title="Previous Post: {{ post.post_previous.title }}">&laquo; {{ post.post_previous.title }}</a>

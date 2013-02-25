@@ -24,7 +24,9 @@ categories:
 
 def generate_post_file_name(title):
     """Return the file name a post should use based on its title and date"""
-    return ''.join(char for char in title.lower() if (char.isalnum() or char == ' ')).replace(' ', '-')
+    return ''.join(char for char in title.lower() if (
+        char.isalnum() or char == ' ')
+        ).replace(' ', '-')
 
 
 def generate_post_file_path(title, date):
@@ -44,29 +46,30 @@ def get_all_posts(content_dir, blog_prefix, canonical_url, blog_root=None):
             continue
 
         post = dict()
-        with open(os.path.join(content_dir, post_file_name), encoding='ascii') as post_file:
+        post_output_path = os.path.join(content_dir, post_file_name)
+        with open(post_output_path, encoding='ascii') as post_file:
             post_file_buffer = post_file.read()
 
         # Generate HTML from Markdown, splitting between the teaser (the
         # content to display on the front page until <!--more--> is reached)
         # and the post proper
-        md = markdown.Markdown(extensions=[
+        mardown_generator = markdown.Markdown(extensions=[
             'fenced_code',
             'codehilite',
             'tables',
             'footnotes',
             'meta',
         ])
-        generated_html = md.convert(post_file_buffer)
+        generated_html = mardown_generator.convert(post_file_buffer)
         post['body'] = generated_html
-        post['title'] = md.Meta['title'][0]
+        post['title'] = mardown_generator.Meta['title'][0]
         (post['teaser'], _, _) = generated_html.partition('<!--more-->')
-        post['categories'] = md.Meta['categories'][0].split()
+        post['categories'] = mardown_generator.Meta['categories'][0].split()
 
         # Construct datetime from the *incredibly useful* string YAML
         # provides
         post['date'] = datetime.datetime.strptime(
-            (md.Meta['date'][0].strip()), '%Y-%m-%d %H:%M')
+            (mardown_generator.Meta['date'][0].strip()), '%Y-%m-%d %H:%M')
 
         # In general we know the layout on disk must match the generated urls
         # This doesn't hold in the case that there is an appendix to the
@@ -136,12 +139,13 @@ def generate_static_page(template_variables, output_dir, template,
 
 def generate_static_files(site_config, posts, categories, template_environment):
     """Generate all 'static' files, files not based on markdown conversion"""
-    # Not sure if this is Octopress silliness, but generate an index.html
-    # at both the root level and the 'blog' level, so both www.foo.com and
+    # Generate an index.html at both the root level and 
+    # the 'blog' level, so both www.foo.com and
     # www.foo.com/blog can serve the blog
     list_template = template_environment.get_template('list.html')
     archives_template = template_environment.get_template('archives.html')
     atom_template = template_environment.get_template('atom.xml')
+    about_template = template_environment.get_template('about.html')
 
     if 'additional_pages' in site_config:
         for entry_name in site_config['additional_pages']:
@@ -154,18 +158,33 @@ def generate_static_files(site_config, posts, categories, template_environment):
             template = template_environment.get_template(template_path)
             generate_static_page(site_config, path, template)
 
+    canonical_url_base = site_config['url']
+    canonical_blog_base = '{url}/{blog_prefix}/'.format(
+            url=canonical_url_base, 
+            blog_prefix=site_config['blog_prefix'])
+
     # Generate main 'index.html' and '/blog/index.html' pages,
     # showing the five most recent posts
     template_variables = copy(site_config)
     template_variables['next_page'] = 1
+    template_variables['canonical_url'] = template_variables['url']
     template_variables['current_posts'] = posts[:5]
     generate_static_page(template_variables,
                          site_config['output_dir'], list_template)
+
+    template_variables['canonical_url'] = canonical_blog_base
     generate_static_page(template_variables,
                          site_config['blog_dir'], list_template)
 
+    # Generate 'about-me' page
+    template_variables['canonical_url'] = canonical_url_base + '/about-me/'
+    generate_static_page(template_variables,
+                         os.path.join(site_config['output_dir'], 'about-me'),
+                         about_template)
+
     # Generate blog archives page
     template_variables['all_posts'] = posts
+    template_variables['canonical_url'] = canonical_blog_base + 'archives/'
     generate_static_page(template_variables,
                          os.path.join(site_config['blog_dir'],
                          'archives'), archives_template)
@@ -225,8 +244,16 @@ def generate_all_files(site_config):
     template_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(
                                               site_config['template_dir']))
 
-    generate_static_files(site_config, all_posts, categories, template_environment)
-    generate_pagination_pages(site_config, all_posts, template_environment.get_template('list.html'))
+    generate_static_files(
+            site_config, 
+            all_posts, 
+            categories, 
+            template_environment)
+
+    generate_pagination_pages(
+            site_config, 
+            all_posts, 
+            template_environment.get_template('list.html'))
 
     for index, post in enumerate(all_posts):
         try:
@@ -250,7 +277,9 @@ def create_post(title, content_dir):
         datetime.datetime.now(), '%Y-%m-%d %H:%M')
     post_date = datetime.datetime.strftime(
         datetime.datetime.now(), '%Y-%m-%d')
-    post_file_name = post_date + '-' + generate_post_file_name(title) + '.md'
+    post_file_name = '{}-{}.md'.format(
+            post_date, 
+            generate_post_file_name(title))
     post_file_path = os.path.join(content_dir, post_file_name)
 
     if os.path.exists(post_file_path):
@@ -261,19 +290,15 @@ def create_post(title, content_dir):
         post_file.write(POST_SKELETON.format(date=post_date_time, title=title))
 
 
-def serve(*args, **kwargs):
+def serve(**kwargs):
     """Serve static HTML pages indefinitely"""
     root = kwargs['root']
     os.chdir(root)
 
-    def log_request(self, *args):
-        """Do not log any requests while serving"""
-        pass
 
     if kwargs['simple']:
         import http.server
         handler = http.server.SimpleHTTPRequestHandler
-        handler.log_request = log_request
         handler.protocol_version = "HTTP/1.0"
         httpd = http.server.HTTPServer((kwargs['host'],
                                         int(kwargs['port'])), handler)
@@ -288,18 +313,21 @@ def serve(*args, **kwargs):
     httpd.serve_forever()
 
 
-def create_new_post(*args, **kwargs):
-    """Reads the appropriate configuration file and generates a new, empty post with
-    the correct file name"""
+def create_new_post(**kwargs):
+    """Reads the appropriate configuration file and generates a new, 
+    empty post with the correct file name"""
     site_config = config.CONFIG
     create_post(kwargs['title'], site_config['content_dir'])
 
 
-def generate_site(*args, **kwargs):
-    """Generate the static HTML pages based on the YAML configuration file and content directory"""
+def generate_site():
+    """Generate the static HTML pages based on the configuration 
+    file and content directory"""
     site_config = config.CONFIG
 
-    site_config['blog_dir'] = os.path.join(site_config['output_dir'], site_config['blog_prefix'])
+    site_config['blog_dir'] = os.path.join(
+        site_config['output_dir'], 
+        site_config['blog_prefix'])
     print ('Generating...')
 
     copy_static_content(site_config['output_dir'], os.getcwd())
@@ -335,19 +363,25 @@ def main():
                 <content-dir> directory')
     serve_parser.add_argument('-p', '--port', default=8080,
                               help='Port for HTTP server to listen to')
-    serve_parser.add_argument('-s', '--host', action='store', default='localhost',
-                              help='Hostname for HTTP server to serve on')
-    serve_parser.add_argument('-r', '--root', action='store', default=os.path.join(
-        os.getcwd(), 'generated'),
-        help='Root path to serve files from')
+    serve_parser.add_argument('-s', '--host', 
+            action='store', 
+            default='localhost',
+            help='Hostname for HTTP server to serve on')
+    serve_parser.add_argument('-r', '--root', 
+            action='store', 
+            default=os.path.join(os.getcwd(), 'generated'),
+            help='Root path to serve files from')
     serve_parser.add_argument('--simple', action='store_true',
-                              help='Use SimpleHTTPServer instead of Blug\'s web server')
+            help='Use SimpleHTTPServer instead of Blug\'s web server')
     serve_parser.set_defaults(func=serve)
 
-    arguments = argument_parser.parse_args()
-
-    argument_dict = vars(arguments)
-    arguments.func(**argument_dict)
+    parsed_arguments = argument_parser.parse_args()
+    arguments = vars(parsed_arguments)
+    function = arguments.pop('func')
+    if function == generate_site:
+        function()
+    else:
+        function(**arguments)
     print ('Complete')
 
 

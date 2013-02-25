@@ -10,6 +10,7 @@
   <meta name="description" content="{% block description %}{{ description }}{% endblock %}"> 
 
   <link rel="icon" href="{{ blog_root|default('', true) }}/images/favicon.png" >
+  <link rel="canonical" href="{% block canonical %}{{ canonical_url }}{% endblock canonical %}"/>
   <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700|Open+Sans:400italic,700italic,400,700' rel='stylesheet' type='text/css'>
   <link href='/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
   <style type="text/css">
@@ -37,14 +38,17 @@
 </head>
 {% block fullbody %}
 <body itemscope itemtype="http://schema.org/Blog">
-    <div class="container-fluid">
-    <div class="navbar navbar-fixed-top navbar-inverse">
-        <div class="navbar-inner">
-            <div class="book-banner">
-                <a class="brand" href="http://www.jeffknupp.com/writing-idiomatic-python-ebook/">Want to write better Python? Check out the book <em>Writing Idiomatic Python</em>!</a>
+    {% if use_navbar %}
+        {% block navbar %}
+        <div class="container-fluid">
+        <div class="navbar navbar-fixed-top navbar-inverse">
+            <div class="navbar-inner">
+                    <!-- Add a Twitter Bootstrap style navbar here if desired -->
+                </div>
             </div>
         </div>
-    </div>
+        {% endblock navbar %}
+    {% endif %}
         <div class="row-fluid">
             <div class="span3">
                 <div class="banner">
@@ -55,13 +59,11 @@
     </hgroup>
     <nav role="navigation">
     <ul class="unstyled">
-        <li><a href="http://www.jeffknupp.com/writing-idiomatic-python-ebook/">the <em>Writing Idiomatic Python</em> Book</a></li>
         <li><a href={{ feed_url }} rel="subscribe-rss" title="subscribe">subscribe</a></li>
-        <li><a href="http://www.jeffknupp.com/python-tutoring/" title="Python Tutoring">python tutoring </a><span class="label label-info">New!</span></li>
         <li><a href="{{ blog_root|default((''), true)}}/{{ blog_prefix }}/archives"> archives</a></li>
         <li><a href="http://www.twitter.com/{{twitter_user}}">@{{twitter_user}}</a></li>
         <div itemprop="author" itemscope itemtype="http://schema.org/Person">
-        <li><a href="{{ blog_root|default((''), true)}}/about-me/" itemprop="url">Jeff Knupp? (about me)</a></li>
+            <li><a href="{{ blog_root|default((''), true)}}/about-me/" itemprop="url">{{ author }}?(about me)</a></li>
         </div>
     </ul>
     </nav>
@@ -100,7 +102,8 @@
   js = d.createElement(s); js.id = id;
   js.src = "//connect.facebook.net/en_US/all.js#appId={{ facebook_appid }}&xfbml=1";
   fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
+  }(document, 'script', 'facebook-jssdk'));
+</script>
   <script type="text/javascript">
     (function(){
       var twitterWidgets = document.createElement('script');
