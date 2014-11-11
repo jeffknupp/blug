@@ -37,7 +37,7 @@ make a change to a post or after finishing a new one. The output in the ```gener
 ## Coming Soon ##
 A number of features have either been committed or are in the process of being committed
 
-* **Live Mardkown Post Editing**- Start up the included webserver and navigate to host:port/create to
+* **Live Markdown Post Editing**- Start up the included webserver and navigate to host:port/create to
 create a new post with live Markdown translation. In the left pane you enter normal Markdown test. The right
 pane is updated with the translated HTML in real time. No more regenerating your entire site just to see if you
 remembered how to do a nested list in Markdown.
